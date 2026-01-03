@@ -1,0 +1,3406 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Class Maze Adventure - OOP Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Nunito:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        box-sizing: border-box;
+        touch-action: manipulation;
+        overflow: hidden;
+      }
+
+      .font-pixel {
+        font-family: "Press Start 2P", cursive;
+      }
+      .font-main {
+        font-family: "Nunito", sans-serif;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+        }
+      }
+
+      @keyframes bounce-in {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      @keyframes enemy-float {
+        0%,
+        100% {
+          transform: translateY(-2px) rotate(-5deg);
+        }
+        50% {
+          transform: translateY(2px) rotate(5deg);
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      @keyframes player-glow {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.7));
+        }
+        50% {
+          filter: drop-shadow(0 0 15px rgba(59, 130, 246, 1));
+        }
+      }
+
+      @keyframes attack-right {
+        0% {
+          transform: translateX(0) scale(1);
+        }
+        30% {
+          transform: translateX(50px) scale(1.2);
+        }
+        60% {
+          transform: translateX(30px) scale(1);
+        }
+        100% {
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      @keyframes attack-left {
+        0% {
+          transform: translateX(0) scale(1);
+        }
+        30% {
+          transform: translateX(-50px) scale(1.2);
+        }
+        60% {
+          transform: translateX(-30px) scale(1);
+        }
+        100% {
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      @keyframes hit-effect {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.9);
+        }
+      }
+
+      @keyframes weapon-fly-right {
+        0% {
+          transform: translateX(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(120px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes weapon-fly-left {
+        0% {
+          transform: translateX(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-120px) rotate(-360deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes coin-collect {
+        0% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-30px) scale(1.3);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-50px) scale(0.8);
+        }
+      }
+
+      .coin-effect {
+        position: absolute;
+        animation: coin-collect 0.8s ease-out forwards;
+        pointer-events: none;
+        z-index: 100;
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(251, 191, 36, 0.8);
+      }
+
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+      .animate-bounce-in {
+        animation: bounce-in 0.4s ease-out forwards;
+      }
+      .animate-enemy {
+        animation: enemy-float 0.8s ease-in-out infinite;
+      }
+      .animate-shake {
+        animation: shake 0.3s ease-in-out;
+      }
+      .animate-player {
+        animation: player-glow 1.5s ease-in-out infinite;
+      }
+      .animate-attack-right {
+        animation: attack-right 0.5s ease-out;
+      }
+      .animate-attack-left {
+        animation: attack-left 0.5s ease-out;
+      }
+      .animate-hit {
+        animation: hit-effect 0.3s ease-in-out;
+      }
+      .animate-weapon-right {
+        animation: weapon-fly-right 0.5s ease-out forwards;
+      }
+      .animate-weapon-left {
+        animation: weapon-fly-left 0.5s ease-out forwards;
+      }
+      .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+      }
+
+      .maze-container {
+        position: relative;
+        background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 8px;
+        overflow: visible;
+        box-shadow: 0 0 40px rgba(99, 102, 241, 0.4),
+          inset 0 0 60px rgba(0, 0, 0, 0.5);
+        border: 2px solid #4338ca;
+      }
+
+      .maze-cell {
+        position: absolute;
+        background: linear-gradient(145deg, #2d3748 0%, #1a202c 100%);
+      }
+
+      .answer-room {
+        position: absolute;
+        background: linear-gradient(145deg, #312e81 0%, #1e1b4b 100%);
+        border: 2px solid #a78bfa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+        z-index: 10;
+        overflow: hidden;
+        padding: 6px;
+        text-align: center;
+      }
+
+      .answer-room.correct {
+        background: linear-gradient(145deg, #065f46 0%, #047857 100%);
+        border-color: #10b981;
+      }
+      .answer-room.incorrect {
+        background: linear-gradient(145deg, #7f1d1d 0%, #991b1b 100%);
+        border-color: #ef4444;
+      }
+
+      .player {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        transition: left 0.08s linear, top 0.08s linear;
+        z-index: 50;
+      }
+
+      .player svg,
+      .player img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+
+      .enemy {
+        position: absolute;
+        z-index: 40;
+        transition: left 0.3s linear, top 0.3s linear;
+      }
+
+      .control-btn {
+        width: 46px;
+        height: 46px;
+        background: linear-gradient(145deg, #4338ca 0%, #3730a3 100%);
+        border: 2px solid #6366f1;
+        border-radius: 12px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.1s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .control-btn:active {
+        transform: scale(0.9);
+        background: linear-gradient(145deg, #3730a3 0%, #312e81 100%);
+      }
+
+      .game-card {
+        background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+        border: 2px solid #6366f1;
+      }
+
+      .code-block {
+        background: #0d1117;
+        border-left: 3px solid #22c55e;
+        font-family: "Courier New", monospace;
+        font-size: 10px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .keyboard-key {
+        min-width: 28px;
+        height: 36px;
+        background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+        border: 2px solid #4b5563;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      .keyboard-key:active {
+        background: linear-gradient(145deg, #1f2937 0%, #374151 100%);
+        transform: scale(0.95);
+      }
+
+      .character-card {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+        border: 3px solid #4b5563;
+        border-radius: 16px;
+        padding: 16px 12px;
+        text-align: center;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .character-card:hover {
+        border-color: #8b5cf6;
+        transform: translateY(-3px);
+      }
+      .character-card.selected {
+        border-color: #fbbf24;
+        background: linear-gradient(145deg, #422006 0%, #78350f 100%);
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+      }
+
+      .character-avatar {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 10px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: linear-gradient(145deg, #374151, #1f2937);
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .character-avatar img,
+      .character-avatar svg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+
+      .level-card {
+        background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+        border: 2px solid #6366f1;
+        border-radius: 16px;
+        padding: 16px;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .level-card:hover {
+        border-color: #a5b4fc;
+        transform: translateY(-2px);
+      }
+      .level-card.checkpoint {
+        border-color: #fbbf24;
+        background: linear-gradient(145deg, #422006 0%, #78350f 100%);
+      }
+      .level-card.completed {
+        background: linear-gradient(145deg, #064e3b 0%, #065f46 100%);
+        border-color: #10b981;
+      }
+      .level-card.locked {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .completed-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #10b981;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      }
+
+      .question-popup {
+        position: fixed;
+        top: 44px;
+        right: 8px;
+        background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+        border: 2px solid #6366f1;
+        border-radius: 12px;
+        padding: 12px;
+        max-width: 300px;
+        width: 300px;
+        z-index: 100;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        max-height: 70%;
+        overflow-y: auto;
+      }
+
+      .controls-container {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        z-index: 80;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 8px;
+        border-radius: 16px;
+        border: 2px solid #4338ca;
+      }
+
+      .game-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(17, 24, 39, 0.95);
+        border-bottom: 2px solid #4338ca;
+        padding: 6px 12px;
+        z-index: 90;
+        height: 38px;
+      }
+
+      .view-question-btn {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: linear-gradient(145deg, #7c3aed 0%, #5b21b6 100%);
+        border: 2px solid #a78bfa;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: bold;
+        font-size: 11px;
+        z-index: 90;
+      }
+
+      .result-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+        border: 4px solid;
+        border-radius: 20px;
+        padding: 30px 50px;
+        z-index: 200;
+        text-align: center;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      }
+
+      .result-popup.show {
+        animation: bounce-in 0.4s ease-out forwards;
+      }
+      .result-popup.correct {
+        border-color: #10b981;
+      }
+      .result-popup.incorrect {
+        border-color: #ef4444;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 150;
+      }
+
+      .pre-game-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+        border: 3px solid #6366f1;
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 90%;
+        width: 480px;
+        z-index: 200;
+        max-height: 80%;
+        overflow-y: auto;
+      }
+
+      .battle-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(145deg, #0f0a1e 0%, #1a0a0a 100%);
+        z-index: 300;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .weapon-btn {
+        background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+        border: 2px solid #6b7280;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        transition: all 0.2s ease;
+        min-width: 90px;
+      }
+
+      .weapon-btn:hover:not(:disabled) {
+        border-color: #a78bfa;
+        transform: translateY(-2px);
+      }
+
+      .weapon-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .xp-bar {
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #1f2937;
+        border: 2px solid #374151;
+      }
+
+      .xp-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+        border-radius: 8px;
+      }
+
+      .spider-enemy {
+        width: 24px;
+        height: 24px;
+      }
+
+      .pickup-item {
+        position: absolute;
+        z-index: 30;
+        animation: float 2s ease-in-out infinite;
+      }
+
+      .coin-item {
+        font-size: 18px;
+        filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.8));
+      }
+
+      .weapon-pickup {
+        font-size: 16px;
+        filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.8));
+      }
+
+      .xp-indicator {
+        position: absolute;
+        font-size: 8px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        white-space: nowrap;
+        z-index: 45;
+      }
+
+      .player-xp-bar {
+        background: rgba(59, 130, 246, 0.9);
+        border: 1px solid #3b82f6;
+      }
+
+      .enemy-xp-bar {
+        background: rgba(239, 68, 68, 0.9);
+        border: 1px solid #ef4444;
+      }
+
+      .flying-weapon {
+        position: absolute;
+        font-size: 32px;
+        z-index: 100;
+      }
+
+      .player-list-item {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+        border: 2px solid #4b5563;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .player-list-item:hover {
+        border-color: #8b5cf6;
+        transform: translateY(-2px);
+      }
+
+      .apperception-card {
+        background: linear-gradient(
+          145deg,
+          rgba(30, 27, 75, 0.9) 0%,
+          rgba(49, 46, 129, 0.9) 100%
+        );
+        border: 2px solid #6366f1;
+        border-radius: 20px;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+      }
+
+      .oop-illustration {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+    <style>
+      @view-transition {
+        navigation: auto;
+      }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  </head>
+  <body class="h-full font-main bg-gray-900 text-white overflow-hidden">
+    <div id="app" class="h-full w-full"></div>
+    <script>
+      // Character definitions with SVG avatars
+      const characters = [
+        {
+          id: "wizard",
+          name: "Penyihir",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#4c1d95"/>
+          <path d="M50 10 L65 50 L50 45 L35 50 Z" fill="#8b5cf6"/>
+          <circle cx="50" cy="60" r="20" fill="#fcd34d"/>
+          <circle cx="43" cy="55" r="4" fill="#1e1b4b"/>
+          <circle cx="57" cy="55" r="4" fill="#1e1b4b"/>
+          <path d="M42 68 Q50 75 58 68" stroke="#1e1b4b" stroke-width="2" fill="none"/>
+          <path d="M30 80 L70 80 L65 95 L35 95 Z" fill="#7c3aed"/>
+        </svg>`,
+          weapons: [
+            { id: "fireball", name: "🔥 Bola Api", damage: 150, maxUses: 5 },
+            { id: "ice", name: "❄️ Es", damage: 100, maxUses: 8 },
+            { id: "lightning", name: "⚡ Petir", damage: 200, maxUses: 3 },
+            { id: "shield", name: "🔮 Pelindung", damage: 80, maxUses: 10 },
+          ],
+        },
+        {
+          id: "ninja",
+          name: "Ninja",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#1f2937"/>
+          <circle cx="50" cy="50" r="25" fill="#374151"/>
+          <rect x="20" y="42" width="60" height="16" fill="#111827"/>
+          <circle cx="38" cy="50" r="6" fill="#ef4444"/>
+          <circle cx="62" cy="50" r="6" fill="#ef4444"/>
+          <circle cx="38" cy="50" r="2" fill="#000"/>
+          <circle cx="62" cy="50" r="2" fill="#000"/>
+          <path d="M75 35 L90 25 L88 35 Z" fill="#6b7280"/>
+        </svg>`,
+          weapons: [
+            { id: "shuriken", name: "⭐ Shuriken", damage: 150, maxUses: 5 },
+            { id: "kunai", name: "🗡️ Kunai", damage: 100, maxUses: 8 },
+            { id: "smoke", name: "💨 Asap", damage: 200, maxUses: 3 },
+            { id: "katana", name: "⚔️ Katana", damage: 80, maxUses: 10 },
+          ],
+        },
+        {
+          id: "archer",
+          name: "Pemanah",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#166534"/>
+          <circle cx="50" cy="45" r="22" fill="#fcd34d"/>
+          <path d="M30 25 Q50 5 70 25" fill="#15803d" stroke="#166534" stroke-width="2"/>
+          <circle cx="42" cy="42" r="4" fill="#1e3a8a"/>
+          <circle cx="58" cy="42" r="4" fill="#1e3a8a"/>
+          <path d="M44 54 Q50 60 56 54" stroke="#1e3a8a" stroke-width="2" fill="none"/>
+          <path d="M25 60 L40 75 L35 95 L25 90 Z" fill="#22c55e"/>
+          <path d="M75 60 L60 75 L65 95 L75 90 Z" fill="#22c55e"/>
+          <path d="M40 75 L60 75 L58 95 L42 95 Z" fill="#15803d"/>
+          <path d="M78 30 L95 15" stroke="#8b4513" stroke-width="3"/>
+          <path d="M85 10 L95 15 L90 25" stroke="#fbbf24" stroke-width="2" fill="none"/>
+        </svg>`,
+          weapons: [
+            { id: "arrow", name: "��� Panah", damage: 150, maxUses: 5 },
+            { id: "crossbow", name: "🎯 Busur", damage: 100, maxUses: 8 },
+            { id: "explosive", name: "💥 Ledak", damage: 200, maxUses: 3 },
+            { id: "trap", name: "🪤 Perangkap", damage: 80, maxUses: 10 },
+          ],
+        },
+        {
+          id: "robot",
+          name: "Robot",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#374151"/>
+          <rect x="25" y="30" width="50" height="45" rx="8" fill="#6b7280"/>
+          <rect x="30" y="35" width="15" height="12" rx="2" fill="#22d3ee"/>
+          <rect x="55" y="35" width="15" height="12" rx="2" fill="#22d3ee"/>
+          <rect x="40" y="55" width="20" height="8" rx="2" fill="#1f2937"/>
+          <rect x="42" y="57" width="4" height="4" fill="#22d3ee"/>
+          <rect x="48" y="57" width="4" height="4" fill="#22d3ee"/>
+          <rect x="54" y="57" width="4" height="4" fill="#22d3ee"/>
+          <rect x="35" y="10" width="30" height="25" rx="5" fill="#4b5563"/>
+          <circle cx="50" cy="20" r="5" fill="#ef4444"/>
+        </svg>`,
+          weapons: [
+            { id: "laser", name: "🔴 Laser", damage: 150, maxUses: 5 },
+            { id: "missile", name: "🚀 Roket", damage: 100, maxUses: 8 },
+            { id: "emp", name: "💥 EMP", damage: 200, maxUses: 3 },
+            { id: "drill", name: "��� Bor", damage: 80, maxUses: 10 },
+          ],
+        },
+        {
+          id: "vampire",
+          name: "Vampir",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#1f1f1f"/>
+          <path d="M20 30 Q50 10 80 30 L75 50 Q50 40 25 50 Z" fill="#111"/>
+          <circle cx="50" cy="55" r="22" fill="#e5e5e5"/>
+          <circle cx="42" cy="50" r="5" fill="#dc2626"/>
+          <circle cx="58" cy="50" r="5" fill="#dc2626"/>
+          <circle cx="42" cy="50" r="2" fill="#000"/>
+          <circle cx="58" cy="50" r="2" fill="#000"/>
+          <path d="M40 68 L45 75 L50 68 L55 75 L60 68" fill="#fff"/>
+          <path d="M30 75 Q50 90 70 75" fill="#7f1d1d"/>
+        </svg>`,
+          weapons: [
+            { id: "bite", name: "🦷 Gigitan", damage: 150, maxUses: 5 },
+            { id: "bat", name: "🦇 Kelelawar", damage: 100, maxUses: 8 },
+            { id: "blood", name: "🩸 Darah", damage: 200, maxUses: 3 },
+            { id: "cloak", name: "🖤 Jubah", damage: 80, maxUses: 10 },
+          ],
+        },
+        {
+          id: "superhero",
+          name: "Pahlawan",
+          avatar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#1e40af"/>
+          <circle cx="50" cy="45" r="22" fill="#fcd34d"/>
+          <circle cx="42" cy="42" r="4" fill="#1e3a8a"/>
+          <circle cx="58" cy="42" r="4" fill="#1e3a8a"/>
+          <path d="M42 55 Q50 62 58 55" stroke="#1e3a8a" stroke-width="2" fill="none"/>
+          <path d="M25 60 L50 70 L75 60 L70 95 L30 95 Z" fill="#dc2626"/>
+          <polygon points="50,65 53,72 60,72 55,77 57,85 50,80 43,85 45,77 40,72 47,72" fill="#fcd34d"/>
+          <path d="M15 55 Q5 70 20 85" fill="#dc2626"/>
+          <path d="M85 55 Q95 70 80 85" fill="#dc2626"/>
+        </svg>`,
+          weapons: [
+            { id: "punch", name: "👊 Tinju", damage: 150, maxUses: 5 },
+            { id: "beam", name: "✨ Sinar", damage: 100, maxUses: 8 },
+            { id: "thunder", name: "⚡ Halilintar", damage: 200, maxUses: 3 },
+            { id: "cape", name: "🦸 Jubah", damage: 80, maxUses: 10 },
+          ],
+        },
+      ];
+
+      // Coin SVG
+      const coinSVG = `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="14" fill="url(#coinGrad)" stroke="#b8860b" stroke-width="2"/>
+      <defs>
+        <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#ffd700"/>
+          <stop offset="50%" style="stop-color:#ffec8b"/>
+          <stop offset="100%" style="stop-color:#daa520"/>
+        </linearGradient>
+      </defs>
+      <circle cx="16" cy="16" r="10" fill="none" stroke="#b8860b" stroke-width="1"/>
+      <text x="16" y="20" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b6914">$</text>
+    </svg>`;
+
+      // Weapon Pickup SVG (Sword)
+      const weaponSVG = `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="2" width="4" height="20" fill="url(#swordGrad)" rx="1"/>
+      <defs>
+        <linearGradient id="swordGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#a0a0a0"/>
+          <stop offset="50%" style="stop-color:#e0e0e0"/>
+          <stop offset="100%" style="stop-color:#a0a0a0"/>
+        </linearGradient>
+      </defs>
+      <polygon points="16,0 12,6 20,6" fill="#c0c0c0"/>
+      <rect x="10" y="22" width="12" height="3" fill="#8b4513" rx="1"/>
+      <rect x="13" y="25" width="6" height="5" fill="#654321" rx="1"/>
+    </svg>`;
+
+      // Ammo Pickup SVG (Target)
+      const ammoSVG = `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="14" fill="#1e3a8a" stroke="#3b82f6" stroke-width="2"/>
+      <circle cx="16" cy="16" r="10" fill="none" stroke="#60a5fa" stroke-width="2"/>
+      <circle cx="16" cy="16" r="6" fill="none" stroke="#93c5fd" stroke-width="2"/>
+      <circle cx="16" cy="16" r="3" fill="#ef4444"/>
+    </svg>`;
+
+      // XP Pickup SVG
+      const xpSVG = `<svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="40" height="24" rx="4" fill="url(#xpGrad)" stroke="#b8860b" stroke-width="1"/>
+      <defs>
+        <linearGradient id="xpGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#ffd700"/>
+          <stop offset="100%" style="stop-color:#b8860b"/>
+        </linearGradient>
+      </defs>
+      <text x="20" y="17" text-anchor="middle" font-size="11" font-weight="bold" fill="#5c4813" font-family="Arial">XP</text>
+    </svg>`;
+
+      // Weapon SVGs for battle
+      function getWeaponSVG(weaponId) {
+        const weaponSVGs = {
+          // Wizard weapons
+          fireball: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="url(#fireGrad)"/><defs><radialGradient id="fireGrad"><stop offset="0%" stop-color="#ff6b00"/><stop offset="100%" stop-color="#ff0000"/></radialGradient></defs><circle cx="20" cy="20" r="8" fill="#ffff00"/><path d="M12 8 Q20 0 28 8" stroke="#ff6b00" stroke-width="3" fill="none"/><path d="M8 15 Q5 20 8 25" stroke="#ff6b00" stroke-width="2" fill="none"/><path d="M32 15 Q35 20 32 25" stroke="#ff6b00" stroke-width="2" fill="none"/></svg>`,
+          ice: `<svg viewBox="0 0 40 40"><polygon points="20,2 25,15 38,15 28,24 32,38 20,30 8,38 12,24 2,15 15,15" fill="url(#iceGrad)"/><defs><linearGradient id="iceGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00ffff"/><stop offset="100%" stop-color="#0066ff"/></linearGradient></defs><circle cx="20" cy="20" r="5" fill="#ffffff" opacity="0.8"/></svg>`,
+          lightning: `<svg viewBox="0 0 40 40"><polygon points="22,2 10,22 18,22 14,38 30,16 22,16 26,2" fill="url(#lightGrad)"/><defs><linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffff00"/><stop offset="100%" stop-color="#ff9900"/></linearGradient></defs></svg>`,
+          shield: `<svg viewBox="0 0 40 40"><path d="M20 4 L34 10 L34 22 Q34 34 20 38 Q6 34 6 22 L6 10 Z" fill="url(#shieldGrad)" stroke="#6b21a8" stroke-width="2"/><defs><linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs><circle cx="20" cy="20" r="6" fill="#c084fc"/></svg>`,
+          // Ninja weapons
+          shuriken: `<svg viewBox="0 0 40 40"><polygon points="20,2 24,16 38,20 24,24 20,38 16,24 2,20 16,16" fill="url(#starGrad)"/><defs><linearGradient id="starGrad"><stop offset="0%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#606060"/></linearGradient></defs><circle cx="20" cy="20" r="4" fill="#303030"/></svg>`,
+          kunai: `<svg viewBox="0 0 40 40"><path d="M20 4 L24 20 L20 36 L16 20 Z" fill="url(#kunaiGrad)"/><defs><linearGradient id="kunaiGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d0d0d0"/><stop offset="100%" stop-color="#707070"/></linearGradient></defs><rect x="17" y="30" width="6" height="8" fill="#8b4513"/><circle cx="20" cy="36" r="2" fill="#333"/></svg>`,
+          smoke: `<svg viewBox="0 0 40 40"><circle cx="14" cy="24" r="10" fill="#666" opacity="0.7"/><circle cx="26" cy="20" r="10" fill="#888" opacity="0.7"/><circle cx="20" cy="14" r="8" fill="#aaa" opacity="0.6"/><circle cx="28" cy="28" r="6" fill="#999" opacity="0.5"/></svg>`,
+          katana: `<svg viewBox="0 0 40 40"><rect x="18" y="2" width="4" height="28" fill="url(#bladeGrad)" rx="1"/><defs><linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#ffffff"/><stop offset="100%" stop-color="#c0c0c0"/></linearGradient></defs><rect x="14" y="28" width="12" height="3" fill="#ffd700" rx="1"/><rect x="16" y="31" width="8" height="7" fill="#8b0000" rx="1"/></svg>`,
+          // Archer weapons
+          arrow: `<svg viewBox="0 0 40 40"><rect x="18" y="8" width="4" height="24" fill="#8b4513"/><polygon points="20,2 16,12 24,12" fill="#808080"/><path d="M14 30 L20 32 L26 30" stroke="#8b4513" stroke-width="2" fill="none"/><line x1="14" y1="32" x2="18" y2="30" stroke="#654321" stroke-width="1"/><line x1="26" y1="32" x2="22" y2="30" stroke="#654321" stroke-width="1"/></svg>`,
+          crossbow: `<svg viewBox="0 0 40 40"><rect x="18" y="14" width="4" height="20" fill="#654321"/><path d="M6 16 Q20 8 34 16" stroke="#8b4513" stroke-width="3" fill="none"/><line x1="10" y1="14" x2="30" y2="14" stroke="#d4a574" stroke-width="1"/><rect x="16" y="10" width="8" height="6" fill="#8b4513" rx="1"/></svg>`,
+          explosive: `<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12" fill="url(#bombGrad)"/><defs><radialGradient id="bombGrad"><stop offset="0%" stop-color="#404040"/><stop offset="100%" stop-color="#1a1a1a"/></radialGradient></defs><rect x="18" y="6" width="4" height="8" fill="#8b4513"/><path d="M18 6 Q20 2 22 6" stroke="#ff6600" stroke-width="2" fill="none"/><circle cx="20" cy="4" r="3" fill="#ff0000" opacity="0.8"/></svg>`,
+          trap: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="30" rx="16" ry="6" fill="#654321"/><path d="M6 28 Q6 20 12 16" stroke="#808080" stroke-width="3" fill="none"/><path d="M34 28 Q34 20 28 16" stroke="#808080" stroke-width="3" fill="none"/><circle cx="12" cy="14" r="3" fill="#c0c0c0"/><circle cx="28" cy="14" r="3" fill="#c0c0c0"/><rect x="10" y="26" width="20" height="4" fill="#8b4513"/></svg>`,
+          // Robot weapons
+          laser: `<svg viewBox="0 0 40 40"><rect x="8" y="16" width="24" height="8" fill="#333" rx="2"/><circle cx="32" cy="20" r="4" fill="#ff0000"/><line x1="2" y1="20" x2="8" y2="20" stroke="#ff0000" stroke-width="3"/><circle cx="32" cy="20" r="2" fill="#ff6666"/></svg>`,
+          missile: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="18" rx="6" ry="14" fill="url(#rocketGrad)"/><defs><linearGradient id="rocketGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#808080"/><stop offset="50%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#808080"/></linearGradient></defs><polygon points="20,2 14,10 26,10" fill="#ff0000"/><path d="M14 28 L20 32 L26 28" fill="#ff6600"/><rect x="12" y="30" width="16" height="4" fill="#ff3300"/></svg>`,
+          emp: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#00ffff" stroke-width="2"/><circle cx="20" cy="20" r="10" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.7"/><circle cx="20" cy="20" r="6" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.5"/><circle cx="20" cy="20" r="3" fill="#00ffff"/><line x1="20" y1="2" x2="20" y2="8" stroke="#00ffff" stroke-width="2"/><line x1="20" y1="32" x2="20" y2="38" stroke="#00ffff" stroke-width="2"/><line x1="2" y1="20" x2="8" y2="20" stroke="#00ffff" stroke-width="2"/><line x1="32" y1="20" x2="38" y2="20" stroke="#00ffff" stroke-width="2"/></svg>`,
+          drill: `<svg viewBox="0 0 40 40"><polygon points="20,2 14,18 26,18" fill="url(#drillGrad)"/><defs><linearGradient id="drillGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#808080"/><stop offset="50%" stop-color="#d0d0d0"/><stop offset="100%" stop-color="#808080"/></linearGradient></defs><rect x="14" y="18" width="12" height="16" fill="#ffd700" rx="2"/><line x1="16" y1="6" x2="20" y2="18" stroke="#606060" stroke-width="1"/><line x1="24" y1="6" x2="20" y2="18" stroke="#606060" stroke-width="1"/></svg>`,
+          // Vampire weapons
+          bite: `<svg viewBox="0 0 40 40"><path d="M8 12 Q20 8 32 12 Q34 20 32 28 Q20 32 8 28 Q6 20 8 12" fill="none" stroke="#ff0000" stroke-width="2"/><polygon points="12,16 14,26 16,16" fill="#ffffff"/><polygon points="24,16 26,26 28,16" fill="#ffffff"/><path d="M10 20 Q20 16 30 20" fill="#8b0000"/></svg>`,
+          bat: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="4" ry="6" fill="#1a1a1a"/><path d="M16 18 Q8 10 4 18 Q8 22 16 22" fill="#333"/><path d="M24 18 Q32 10 36 18 Q32 22 24 22" fill="#333"/><circle cx="18" cy="18" r="1.5" fill="#ff0000"/><circle cx="22" cy="18" r="1.5" fill="#ff0000"/><polygon points="19,24 20,26 21,24" fill="#ff0000"/></svg>`,
+          blood: `<svg viewBox="0 0 40 40"><path d="M20 4 Q28 16 28 24 Q28 34 20 36 Q12 34 12 24 Q12 16 20 4" fill="url(#bloodGrad)"/><defs><linearGradient id="bloodGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#ff0000"/><stop offset="100%" stop-color="#8b0000"/></linearGradient></defs><ellipse cx="18" cy="18" rx="3" ry="4" fill="#ff6666" opacity="0.6"/></svg>`,
+          cloak: `<svg viewBox="0 0 40 40"><path d="M20 4 L32 12 L34 34 Q20 38 6 34 L8 12 Z" fill="url(#cloakGrad)"/><defs><linearGradient id="cloakGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#000000"/></linearGradient></defs><path d="M16 10 Q20 6 24 10 Q24 14 20 16 Q16 14 16 10" fill="#4a0080"/><circle cx="20" cy="12" r="2" fill="#8b00ff" opacity="0.5"/></svg>`,
+          // Superhero weapons
+          punch: `<svg viewBox="0 0 40 40"><path d="M10 28 L8 20 L12 12 L18 10 L24 10 L30 14 L32 22 L28 28 Z" fill="url(#fistGrad)"/><defs><linearGradient id="fistGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffcc99"/><stop offset="100%" stop-color="#cc9966"/></linearGradient></defs><line x1="14" y1="14" x2="14" y2="24" stroke="#cc9966" stroke-width="1"/><line x1="19" y1="12" x2="19" y2="24" stroke="#cc9966" stroke-width="1"/><line x1="24" y1="14" x2="24" y2="24" stroke="#cc9966" stroke-width="1"/><path d="M4 16 L10 20 M4 20 L8 22 M4 24 L10 24" stroke="#ffff00" stroke-width="2"/></svg>`,
+          beam: `<svg viewBox="0 0 40 40"><polygon points="20,4 24,16 38,16 26,24 30,36 20,28 10,36 14,24 2,16 16,16" fill="url(#beamGrad)"/><defs><linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffff00"/><stop offset="100%" stop-color="#ffcc00"/></linearGradient></defs><circle cx="20" cy="20" r="4" fill="#ffffff"/></svg>`,
+          thunder: `<svg viewBox="0 0 40 40"><polygon points="22,2 8,20 18,20 14,38 32,16 22,16 26,2" fill="url(#thunderGrad)"/><defs><linearGradient id="thunderGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00bfff"/><stop offset="100%" stop-color="#0066ff"/></linearGradient></defs><polygon points="22,2 8,20 18,20 14,38 32,16 22,16 26,2" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/></svg>`,
+          cape: `<svg viewBox="0 0 40 40"><path d="M12 8 Q20 4 28 8 L32 32 Q20 38 8 32 Z" fill="url(#capeGrad)"/><defs><linearGradient id="capeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/></linearGradient></defs><path d="M12 8 Q20 12 28 8" stroke="#ffd700" stroke-width="2" fill="none"/><circle cx="20" cy="10" r="3" fill="#ffd700"/></svg>`,
+        };
+        return (
+          weaponSVGs[weaponId] ||
+          `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#666"/><text x="20" y="25" text-anchor="middle" fill="#fff" font-size="12">?</text></svg>`
+        );
+      }
+
+      // Spider SVG for enemies
+      const spiderSVG = `<svg class="spider-enemy" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="32" cy="32" rx="14" ry="12" fill="#1a1a1a"/>
+      <ellipse cx="32" cy="24" rx="10" ry="8" fill="#2d2d2d"/>
+      <circle cx="28" cy="22" r="3" fill="#ff0000"/>
+      <circle cx="36" cy="22" r="3" fill="#ff0000"/>
+      <circle cx="28" cy="22" r="1.5" fill="#ffffff"/>
+      <circle cx="36" cy="22" r="1.5" fill="#ffffff"/>
+      <path d="M18 28 Q8 20 4 28" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M18 32 Q6 32 2 40" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M18 36 Q8 44 4 52" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M46 28 Q56 20 60 28" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M46 32 Q58 32 62 40" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M46 36 Q56 44 60 52" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M20 40 Q12 52 8 58" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+      <path d="M44 40 Q52 52 56 58" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    </svg>`;
+
+      // Enemy damage values (reduced for balance)
+      const enemyDamages = [30, 40, 50];
+
+      // Saved players using localStorage
+      let savedPlayers = [];
+
+      // Game State
+      const GameState = {
+        currentScreen: "apperception",
+        playerName: "",
+        selectedCharacter: null,
+        currentLevel: 0,
+        lastCheckpoint: 0,
+        score: 0,
+        lives: 3,
+        playerXP: 500,
+        timeLeft: 0,
+        timerInterval: null,
+        enemyInterval: null,
+        playerPos: { x: 0, y: 0 },
+        enemies: [],
+        currentQuestion: null,
+        answered: false,
+        showingQuestionPopup: false,
+        showingPreGamePopup: false,
+        showingResultPopup: false,
+        resultType: null,
+        isPaused: false,
+        playerInRoom: null,
+        completedLevels: {},
+        currentMazeLayout: 0,
+        currentQuestionIndex: 0,
+        // Battle state
+        inBattle: false,
+        currentEnemy: null,
+        currentEnemyIndex: -1,
+        enemyXP: 750,
+        weaponUses: {},
+        isPlayerAttacking: false,
+        isEnemyAttacking: false,
+        attackingWeapon: null,
+        // Pickups
+        xpPickups: [],
+        coins: [],
+        coinScore: 0,
+        coinsCollected: 0,
+        // Player data
+        currentPlayerRecord: null,
+        isNewPlayer: true,
+        showingPlayerConfirmPopup: false,
+        selectedExistingPlayer: null,
+        isLoading: false,
+      };
+
+      // Question Bank with fictional brands - multiple questions per level
+      const questionBank = {
+        1: [
+          {
+            text: "Manakah cara yang BENAR untuk membuat objek dari kelas Mobil?",
+            code: `class Mobil:\n    def __init__(self, merk):\n        self.merk = merk`,
+            answers: [
+              { id: "A", text: 'Mobil("Xendra")', correct: true },
+              { id: "B", text: "new Mobil()", correct: false },
+              { id: "C", text: "Mobil.create()", correct: false },
+              { id: "D", text: "create Mobil()", correct: false },
+              { id: "E", text: "Mobil->new()", correct: false },
+            ],
+          },
+          {
+            text: "Apa fungsi dari method __init__ dalam sebuah kelas?",
+            code: `class Hewan:\n    def __init__(self, nama):\n        self.nama = nama`,
+            answers: [
+              { id: "A", text: "Konstruktor", correct: true },
+              { id: "B", text: "Destruktor", correct: false },
+              { id: "C", text: "Getter", correct: false },
+              { id: "D", text: "Setter", correct: false },
+              { id: "E", text: "Iterator", correct: false },
+            ],
+          },
+          {
+            text: "Apa nama atribut yang dimiliki objek dari kelas ini?",
+            code: `class Buku:\n    def __init__(self, judul):\n        self.judul = judul\n\nb = Buku("Python")`,
+            answers: [
+              { id: "A", text: "judul", correct: true },
+              { id: "B", text: "Buku", correct: false },
+              { id: "C", text: "self", correct: false },
+              { id: "D", text: "init", correct: false },
+              { id: "E", text: "Python", correct: false },
+            ],
+          },
+        ],
+        2: [
+          {
+            text: "Apa keluaran dari kode berikut?",
+            code: `class Calc:\n    def __init__(self):\n        self.n = 0\n    def add(self, x):\n        self.n += x\n        return self.n\n\nc = Calc()\nprint(c.add(5))\nprint(c.add(3))`,
+            answers: [
+              { id: "A", text: "5 lalu 8", correct: true },
+              { id: "B", text: "5 lalu 3", correct: false },
+              { id: "C", text: "0 lalu 0", correct: false },
+              { id: "D", text: "8 lalu 8", correct: false },
+              { id: "E", text: "Galat", correct: false },
+            ],
+          },
+          {
+            text: "Apa keluaran dari method greet?",
+            code: `class Person:\n    def __init__(self, nama):\n        self.nama = nama\n    def greet(self):\n        return f"Halo, {self.nama}"\n\np = Person("Andi")\nprint(p.greet())`,
+            answers: [
+              { id: "A", text: "Halo, Andi", correct: true },
+              { id: "B", text: "Halo, nama", correct: false },
+              { id: "C", text: "Andi", correct: false },
+              { id: "D", text: "Galat", correct: false },
+              { id: "E", text: "None", correct: false },
+            ],
+          },
+        ],
+        3: [
+          {
+            text: "Bagaimana cara mengakses atribut privat __saldo?",
+            code: `class Bank:\n    def __init__(self):\n        self.__saldo = 1000\n    def get_saldo(self):\n        return self.__saldo\n\nb = Bank()`,
+            answers: [
+              { id: "A", text: "b.get_saldo()", correct: true },
+              { id: "B", text: "b.__saldo", correct: false },
+              { id: "C", text: "b.saldo", correct: false },
+              { id: "D", text: "Bank.__saldo", correct: false },
+              { id: "E", text: "b._saldo", correct: false },
+            ],
+          },
+          {
+            text: "Mengapa atribut __password tidak bisa diakses langsung?",
+            code: `class User:\n    def __init__(self):\n        self.__password = "rahasia"\n\nu = User()\nprint(u.__password)`,
+            answers: [
+              { id: "A", text: "Enkapsulasi", correct: true },
+              { id: "B", text: "Pewarisan", correct: false },
+              { id: "C", text: "Polimorfisme", correct: false },
+              { id: "D", text: "Abstraksi", correct: false },
+              { id: "E", text: "Komposisi", correct: false },
+            ],
+          },
+        ],
+        4: [
+          {
+            text: "Apa keluaran dari kode berikut?",
+            code: `class Hewan:\n    def suara(self):\n        return "..."\n\nclass Kucing(Hewan):\n    def suara(self):\n        return "Meong!"\n\nk = Kucing()\nprint(k.suara())`,
+            answers: [
+              { id: "A", text: "Meong!", correct: true },
+              { id: "B", text: "...", correct: false },
+              { id: "C", text: "None", correct: false },
+              { id: "D", text: "Meong!...", correct: false },
+              { id: "E", text: "Galat", correct: false },
+            ],
+          },
+          {
+            text: "Apa yang diwariskan dari kelas induk?",
+            code: `class Kendaraan:\n    def __init__(self):\n        self.roda = 4\n\nclass Mobil(Kendaraan):\n    pass\n\nm = Mobil()\nprint(m.roda)`,
+            answers: [
+              { id: "A", text: "4", correct: true },
+              { id: "B", text: "None", correct: false },
+              { id: "C", text: "Galat", correct: false },
+              { id: "D", text: "0", correct: false },
+              { id: "E", text: "roda", correct: false },
+            ],
+          },
+        ],
+        5: [
+          {
+            text: "Apa hasil keluaran dari kode ini?",
+            code: `class Bentuk:\n    def luas(self):\n        pass\n\nclass Persegi(Bentuk):\n    def __init__(self, s):\n        self.s = s\n    def luas(self):\n        return self.s ** 2\n\np = Persegi(4)\nprint(p.luas())`,
+            answers: [
+              { id: "A", text: "16", correct: true },
+              { id: "B", text: "8", correct: false },
+              { id: "C", text: "4", correct: false },
+              { id: "D", text: "None", correct: false },
+              { id: "E", text: "Galat", correct: false },
+            ],
+          },
+          {
+            text: "Konsep apa yang ditunjukkan ketika method yang sama memiliki perilaku berbeda?",
+            code: `class A:\n    def speak(self): return "A"\nclass B(A):\n    def speak(self): return "B"`,
+            answers: [
+              { id: "A", text: "Polimorfisme", correct: true },
+              { id: "B", text: "Enkapsulasi", correct: false },
+              { id: "C", text: "Abstraksi", correct: false },
+              { id: "D", text: "Komposisi", correct: false },
+              { id: "E", text: "Agregasi", correct: false },
+            ],
+          },
+        ],
+        6: [
+          {
+            text: "Apa yang terjadi saat membuat instansi dari kelas abstrak?",
+            code: `from abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    @abstractmethod\n    def area(self):\n        pass\n\nclass Circle(Shape):\n    pass\n\nc = Circle()`,
+            answers: [
+              { id: "A", text: "TypeError", correct: true },
+              { id: "B", text: "None", correct: false },
+              { id: "C", text: "0", correct: false },
+              { id: "D", text: "Berhasil", correct: false },
+              { id: "E", text: "ValueError", correct: false },
+            ],
+          },
+          {
+            text: "Apa fungsi dari decorator @abstractmethod?",
+            code: `from abc import ABC, abstractmethod\n\nclass Base(ABC):\n    @abstractmethod\n    def do_something(self):\n        pass`,
+            answers: [
+              { id: "A", text: "Wajib diimplementasi", correct: true },
+              { id: "B", text: "Opsional", correct: false },
+              { id: "C", text: "Privat", correct: false },
+              { id: "D", text: "Statis", correct: false },
+              { id: "E", text: "Publik", correct: false },
+            ],
+          },
+        ],
+        7: [
+          {
+            text: "Apa keluaran dari pewarisan berganda ini?",
+            code: `class A:\n    def greet(self):\n        return "Halo A"\n\nclass B:\n    def greet(self):\n        return "Halo B"\n\nclass C(A, B):\n    pass\n\nc = C()\nprint(c.greet())`,
+            answers: [
+              { id: "A", text: "Halo A", correct: true },
+              { id: "B", text: "Halo B", correct: false },
+              { id: "C", text: "Halo AB", correct: false },
+              { id: "D", text: "None", correct: false },
+              { id: "E", text: "Galat", correct: false },
+            ],
+          },
+          {
+            text: "Urutan pencarian method pada pewarisan berganda disebut?",
+            code: `class X: pass\nclass Y: pass\nclass Z(X, Y): pass`,
+            answers: [
+              { id: "A", text: "MRO", correct: true },
+              { id: "B", text: "DFS", correct: false },
+              { id: "C", text: "BFS", correct: false },
+              { id: "D", text: "LIFO", correct: false },
+              { id: "E", text: "FIFO", correct: false },
+            ],
+          },
+        ],
+        8: [
+          {
+            text: "Apa keluaran dari komposisi ini?",
+            code: `class Mesin:\n    def start(self):\n        return "Menyala"\n\nclass Mobil:\n    def __init__(self):\n        self.mesin = Mesin()\n    def jalan(self):\n        return self.mesin.start()\n\nm = Mobil()\nprint(m.jalan())`,
+            answers: [
+              { id: "A", text: "Menyala", correct: true },
+              { id: "B", text: "Mobil Menyala", correct: false },
+              { id: "C", text: "None", correct: false },
+              { id: "D", text: "Mesin", correct: false },
+              { id: "E", text: "Galat", correct: false },
+            ],
+          },
+          {
+            text: "Apa perbedaan komposisi dengan agregasi?",
+            code: `# Komposisi\nclass A:\n    def __init__(self):\n        self.b = B()\n\n# Agregasi\nclass C:\n    def __init__(self, d):\n        self.d = d`,
+            answers: [
+              { id: "A", text: "Kepemilikan kuat", correct: true },
+              { id: "B", text: "Pewarisan", correct: false },
+              { id: "C", text: "Polimorfisme", correct: false },
+              { id: "D", text: "Enkapsulasi", correct: false },
+              { id: "E", text: "Sama saja", correct: false },
+            ],
+          },
+        ],
+      };
+
+      // Level Data with enemy counts
+      const levels = [
+        {
+          id: 1,
+          name: "Class & Object",
+          timeLimit: 90,
+          enemyCount: 3,
+          isCheckpoint: false,
+        },
+        {
+          id: 2,
+          name: "Method",
+          timeLimit: 90,
+          enemyCount: 3,
+          isCheckpoint: true,
+        },
+        {
+          id: 3,
+          name: "Encapsulation",
+          timeLimit: 100,
+          enemyCount: 3,
+          isCheckpoint: false,
+        },
+        {
+          id: 4,
+          name: "Inheritance",
+          timeLimit: 100,
+          enemyCount: 4,
+          isCheckpoint: true,
+        },
+        {
+          id: 5,
+          name: "Polymorphism",
+          timeLimit: 110,
+          enemyCount: 4,
+          isCheckpoint: false,
+        },
+        {
+          id: 6,
+          name: "Abstraction",
+          timeLimit: 110,
+          enemyCount: 4,
+          isCheckpoint: true,
+        },
+        {
+          id: 7,
+          name: "Multiple Inheritance",
+          timeLimit: 120,
+          enemyCount: 5,
+          isCheckpoint: false,
+        },
+        {
+          id: 8,
+          name: "Composition",
+          timeLimit: 120,
+          enemyCount: 5,
+          isCheckpoint: true,
+        },
+      ];
+
+      // Multiple maze layouts with flexible answer rooms
+      const mazeLayouts = [
+        // Layout 0
+        {
+          grid: [
+            [2, 2, 0, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 0, 4, 4],
+            [2, 2, 1, 1, 0, 0, 0, 1, 0, 3, 3, 0, 1, 0, 0, 1, 1, 4, 4],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 5, 5, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [6, 6, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 7, 7],
+            [6, 6, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7, 7],
+          ],
+          rooms: {
+            A: { gridX: 0, gridY: 0, width: 2, height: 2 },
+            B: { gridX: 9, gridY: 0, width: 2, height: 2 },
+            C: { gridX: 17, gridY: 0, width: 2, height: 2 },
+            D: { gridX: 8, gridY: 5, width: 2, height: 2 },
+            E: { gridX: 0, gridY: 11, width: 2, height: 2 },
+          },
+          start: { x: 0, y: 6 },
+        },
+        // Layout 1
+        {
+          grid: [
+            [0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [3, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 4, 4, 0],
+            [3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 0],
+            [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 1, 5, 5, 0, 1, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+          ],
+          rooms: {
+            A: { gridX: 8, gridY: 0, width: 2, height: 2 },
+            B: { gridX: 0, gridY: 3, width: 2, height: 2 },
+            C: { gridX: 16, gridY: 3, width: 2, height: 2 },
+            D: { gridX: 8, gridY: 8, width: 2, height: 2 },
+            E: { gridX: 8, gridY: 8, width: 2, height: 2 },
+          },
+          start: { x: 0, y: 6 },
+        },
+        // Layout 2
+        {
+          grid: [
+            [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 3, 3, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 4, 4, 0, 0],
+            [0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0],
+            [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 5, 5, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 6, 6, 0, 0],
+            [0, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+          ],
+          rooms: {
+            A: { gridX: 8, gridY: 0, width: 2, height: 2 },
+            B: { gridX: 1, gridY: 3, width: 2, height: 2 },
+            C: { gridX: 15, gridY: 3, width: 2, height: 2 },
+            D: { gridX: 1, gridY: 7, width: 2, height: 2 },
+            E: { gridX: 15, gridY: 7, width: 2, height: 2 },
+          },
+          start: { x: 0, y: 6 },
+        },
+      ];
+
+      const CELL_SIZE = 32;
+      const GRID_COLS = 19;
+      const GRID_ROWS = 13;
+      const MAZE_WIDTH = GRID_COLS * CELL_SIZE;
+      const MAZE_HEIGHT = GRID_ROWS * CELL_SIZE;
+
+      // localStorage functions
+      function loadPlayersFromStorage() {
+        try {
+          const data = localStorage.getItem("classMazePlayers");
+          savedPlayers = data ? JSON.parse(data) : [];
+        } catch (e) {
+          savedPlayers = [];
+        }
+      }
+
+      function savePlayersToStorage() {
+        try {
+          localStorage.setItem(
+            "classMazePlayers",
+            JSON.stringify(savedPlayers)
+          );
+        } catch (e) {
+          console.error("Failed to save to localStorage");
+        }
+      }
+
+      function getRandomQuestion(levelId) {
+        const questions = questionBank[levelId];
+        const index = GameState.currentQuestionIndex % questions.length;
+        return questions[index];
+      }
+
+      function getCurrentMaze() {
+        return mazeLayouts[GameState.currentMazeLayout % mazeLayouts.length];
+      }
+
+      function getCharacterWeapons() {
+        const char = characters.find(
+          (c) => c.id === GameState.selectedCharacter
+        );
+        return char ? char.weapons : [];
+      }
+
+      function getCharacterAvatar() {
+        const char = characters.find(
+          (c) => c.id === GameState.selectedCharacter
+        );
+        return char ? char.avatar : "";
+      }
+
+      function getCharacterAvatarById(id) {
+        const char = characters.find((c) => c.id === id);
+        return char ? char.avatar : "";
+      }
+
+      function gridToPixel(gx, gy) {
+        return {
+          x: gx * CELL_SIZE + CELL_SIZE / 2,
+          y: gy * CELL_SIZE + CELL_SIZE / 2,
+        };
+      }
+
+      function isWalkable(gx, gy) {
+        const maze = getCurrentMaze();
+        if (gx < 0 || gx >= GRID_COLS || gy < 0 || gy >= GRID_ROWS)
+          return false;
+        const cell = maze.grid[gy][gx];
+        return cell !== 0;
+      }
+
+      function getAnswerRoomAt(gx, gy) {
+        const maze = getCurrentMaze();
+        const cell = maze.grid[gy] ? maze.grid[gy][gx] : 0;
+        if (cell === 2) return "A";
+        if (cell === 3) return "B";
+        if (cell === 4) return "C";
+        if (cell === 5) return "D";
+        if (cell === 6) return "E";
+        if (cell === 7) return "E";
+        return null;
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+      }
+
+      function getTextWidth(text) {
+        const charWidth = 7;
+        return Math.max(text.length * charWidth + 16, 50);
+      }
+
+      function getLeaderboard() {
+        return savedPlayers
+          .map((p) => ({ name: p.playerName, score: p.totalScore || 0 }))
+          .sort((a, b) => b.score - a.score);
+      }
+
+      // Render Functions
+      function renderApperception() {
+        return `
+        <div class="h-full w-full flex flex-col items-center justify-center p-6 overflow-auto" style="background: linear-gradient(135deg, #0a0a15 0%, #1a1a2e 50%, #0f172a 100%);">
+          <div class="max-w-lg w-full text-center">
+            <!-- Before/After Illustration - OOP Concept -->
+            <div class="flex justify-center gap-4 mb-8">
+              <div class="flex flex-col items-center animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="oop-illustration w-36 h-36 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-gray-600 flex items-center justify-center mb-2">
+                  <svg viewBox="0 0 120 120" class="w-full h-full">
+                    <!-- Code Editor Background -->
+                    <rect x="0" y="0" width="120" height="120" fill="#1e1e2e" rx="4"/>
+                    <!-- Title bar -->
+                    <rect x="0" y="0" width="120" height="12" fill="#2d2d3d" rx="4"/>
+                    <circle cx="8" cy="6" r="2.5" fill="#ff5f56"/>
+                    <circle cx="16" cy="6" r="2.5" fill="#ffbd2e"/>
+                    <circle cx="24" cy="6" r="2.5" fill="#27ca40"/>
+                    <text x="45" y="9" font-size="5" fill="#888" font-family="monospace">mobil.py</text>
+                    <!-- Line numbers -->
+                    <text x="4" y="22" font-size="5" fill="#555" font-family="monospace">1</text>
+                    <text x="4" y="30" font-size="5" fill="#555" font-family="monospace">2</text>
+                    <text x="4" y="38" font-size="5" fill="#555" font-family="monospace">3</text>
+                    <text x="4" y="46" font-size="5" fill="#555" font-family="monospace">4</text>
+                    <text x="4" y="54" font-size="5" fill="#555" font-family="monospace">5</text>
+                    <text x="4" y="62" font-size="5" fill="#555" font-family="monospace">6</text>
+                    <text x="4" y="70" font-size="5" fill="#555" font-family="monospace">7</text>
+                    <text x="4" y="78" font-size="5" fill="#555" font-family="monospace">8</text>
+                    <text x="4" y="86" font-size="5" fill="#555" font-family="monospace">9</text>
+                    <text x="2" y="94" font-size="5" fill="#555" font-family="monospace">10</text>
+                    <text x="2" y="102" font-size="5" fill="#555" font-family="monospace">11</text>
+                    <text x="2" y="110" font-size="5" fill="#555" font-family="monospace">12</text>
+                    <!-- Unstructured code - no class, scattered variables -->
+                    <text x="14" y="22" font-size="5" fill="#9ca3af" font-family="monospace">merk = "Xendra"</text>
+                    <text x="14" y="30" font-size="5" fill="#9ca3af" font-family="monospace">roda = 4</text>
+                    <text x="14" y="38" font-size="5" fill="#9ca3af" font-family="monospace">warna = "merah"</text>
+                    <text x="14" y="46" font-size="5" fill="#9ca3af" font-family="monospace"></text>
+                    <text x="14" y="54" font-size="5" fill="#c586c0" font-family="monospace">def</text>
+                    <text x="26" y="54" font-size="5" fill="#9ca3af" font-family="monospace">jalan():</text>
+                    <text x="18" y="62" font-size="5" fill="#569cd6" font-family="monospace">print</text>
+                    <text x="32" y="62" font-size="5" fill="#ce9178" font-family="monospace">("Jalan")</text>
+                    <text x="14" y="70" font-size="5" fill="#c586c0" font-family="monospace">def</text>
+                    <text x="26" y="70" font-size="5" fill="#9ca3af" font-family="monospace">berhenti():</text>
+                    <text x="18" y="78" font-size="5" fill="#569cd6" font-family="monospace">print</text>
+                    <text x="32" y="78" font-size="5" fill="#ce9178" font-family="monospace">("Stop")</text>
+                    <text x="14" y="86" font-size="5" fill="#9ca3af" font-family="monospace"></text>
+                    <text x="14" y="94" font-size="5" fill="#9ca3af" font-family="monospace">jalan()</text>
+                    <text x="14" y="102" font-size="5" fill="#569cd6" font-family="monospace">print</text>
+                    <text x="28" y="102" font-size="5" fill="#9ca3af" font-family="monospace">(merk)</text>
+                    <text x="14" y="110" font-size="5" fill="#608b4e" font-family="monospace"># Tidak terstruktur</text>
+                    <!-- Warning indicator -->
+                    <circle cx="110" cy="20" r="6" fill="#ef4444" opacity="0.8"/>
+                    <text x="110" y="23" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">!</text>
+                  </svg>
+                </div>
+                <span class="text-gray-400 text-sm">Kode Tidak Terstruktur</span>
+              </div>
+              
+              <div class="flex items-center text-3xl animate-pulse">➡️</div>
+              
+              <div class="flex flex-col items-center animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="oop-illustration w-36 h-36 bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500 flex items-center justify-center mb-2" style="box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);">
+                  <svg viewBox="0 0 120 120" class="w-full h-full">
+                    <!-- Code Editor Background -->
+                    <rect x="0" y="0" width="120" height="120" fill="#1e1e2e" rx="4"/>
+                    <!-- Title bar -->
+                    <rect x="0" y="0" width="120" height="12" fill="#2d2d3d" rx="4"/>
+                    <circle cx="8" cy="6" r="2.5" fill="#ff5f56"/>
+                    <circle cx="16" cy="6" r="2.5" fill="#ffbd2e"/>
+                    <circle cx="24" cy="6" r="2.5" fill="#27ca40"/>
+                    <text x="45" y="9" font-size="5" fill="#888" font-family="monospace">mobil.py</text>
+                    <!-- Line numbers -->
+                    <text x="4" y="22" font-size="5" fill="#555" font-family="monospace">1</text>
+                    <text x="4" y="30" font-size="5" fill="#555" font-family="monospace">2</text>
+                    <text x="4" y="38" font-size="5" fill="#555" font-family="monospace">3</text>
+                    <text x="4" y="46" font-size="5" fill="#555" font-family="monospace">4</text>
+                    <text x="4" y="54" font-size="5" fill="#555" font-family="monospace">5</text>
+                    <text x="4" y="62" font-size="5" fill="#555" font-family="monospace">6</text>
+                    <text x="4" y="70" font-size="5" fill="#555" font-family="monospace">7</text>
+                    <text x="4" y="78" font-size="5" fill="#555" font-family="monospace">8</text>
+                    <text x="4" y="86" font-size="5" fill="#555" font-family="monospace">9</text>
+                    <text x="2" y="94" font-size="5" fill="#555" font-family="monospace">10</text>
+                    <text x="2" y="102" font-size="5" fill="#555" font-family="monospace">11</text>
+                    <text x="2" y="110" font-size="5" fill="#555" font-family="monospace">12</text>
+                    <!-- Code content -->
+                    <text x="14" y="22" font-size="5" fill="#c586c0" font-family="monospace">class</text>
+                    <text x="30" y="22" font-size="5" fill="#4ec9b0" font-family="monospace">Mobil:</text>
+                    <text x="18" y="30" font-size="5" fill="#c586c0" font-family="monospace">def</text>
+                    <text x="30" y="30" font-size="5" fill="#dcdcaa" font-family="monospace">__init__</text>
+                    <text x="56" y="30" font-size="5" fill="#9cdcfe" font-family="monospace">(self):</text>
+                    <text x="22" y="38" font-size="5" fill="#9cdcfe" font-family="monospace">self</text>
+                    <text x="34" y="38" font-size="5" fill="#fff" font-family="monospace">.</text>
+                    <text x="37" y="38" font-size="5" fill="#9cdcfe" font-family="monospace">merk</text>
+                    <text x="52" y="38" font-size="5" fill="#fff" font-family="monospace">=</text>
+                    <text x="57" y="38" font-size="5" fill="#ce9178" font-family="monospace">"Xendra"</text>
+                    <text x="22" y="46" font-size="5" fill="#9cdcfe" font-family="monospace">self</text>
+                    <text x="34" y="46" font-size="5" fill="#fff" font-family="monospace">.</text>
+                    <text x="37" y="46" font-size="5" fill="#9cdcfe" font-family="monospace">roda</text>
+                    <text x="52" y="46" font-size="5" fill="#fff" font-family="monospace">=</text>
+                    <text x="57" y="46" font-size="5" fill="#b5cea8" font-family="monospace">4</text>
+                    <text x="14" y="58" font-size="5" fill="#608b4e" font-family="monospace"># Method</text>
+                    <text x="18" y="66" font-size="5" fill="#c586c0" font-family="monospace">def</text>
+                    <text x="30" y="66" font-size="5" fill="#dcdcaa" font-family="monospace">jalan</text>
+                    <text x="46" y="66" font-size="5" fill="#9cdcfe" font-family="monospace">(self):</text>
+                    <text x="22" y="74" font-size="5" fill="#c586c0" font-family="monospace">return</text>
+                    <text x="40" y="74" font-size="5" fill="#ce9178" font-family="monospace">"Berjalan"</text>
+                    <text x="14" y="86" font-size="5" fill="#608b4e" font-family="monospace"># Objek</text>
+                    <text x="14" y="94" font-size="5" fill="#9cdcfe" font-family="monospace">mobil1</text>
+                    <text x="36" y="94" font-size="5" fill="#fff" font-family="monospace">=</text>
+                    <text x="42" y="94" font-size="5" fill="#4ec9b0" font-family="monospace">Mobil()</text>
+                    <text x="14" y="102" font-size="5" fill="#569cd6" font-family="monospace">print</text>
+                    <text x="28" y="102" font-size="5" fill="#fff" font-family="monospace">(</text>
+                    <text x="32" y="102" font-size="5" fill="#9cdcfe" font-family="monospace">mobil1</text>
+                    <text x="52" y="102" font-size="5" fill="#fff" font-family="monospace">.</text>
+                    <text x="55" y="102" font-size="5" fill="#9cdcfe" font-family="monospace">merk</text>
+                    <text x="68" y="102" font-size="5" fill="#fff" font-family="monospace">)</text>
+                    <text x="14" y="110" font-size="5" fill="#608b4e" font-family="monospace"># Output: Xendra</text>
+                  </svg>
+                </div>
+                <span class="text-purple-400 text-sm">Kode OOP</span>
+              </div>
+            </div>
+            
+            <!-- Text Content -->
+            <div class="apperception-card mb-8 animate-fade-in" style="animation-delay: 0.8s;">
+              <p class="text-xl text-cyan-300 mb-4 leading-relaxed">
+                Program membutuhkan struktur.
+              </p>
+              <p class="text-gray-300 text-base mb-6 leading-relaxed">
+                Namun, cara kita mengorganisasi kode menentukan <span class="text-yellow-400 font-bold">kualitas</span> dan <span class="text-green-400 font-bold">skalabilitas</span> program tersebut.
+              </p>
+              <div class="border-t border-indigo-700 pt-4">
+                <p class="text-lg text-purple-200">
+                  Jika kamu yang menentukan, <br>
+                  <span class="text-yellow-400 font-bold">program seperti apa yang akan kamu bangun?</span>
+                </p>
+              </div>
+            </div>
+            
+            <!-- Topic Badge -->
+            <div class="mb-6 animate-fade-in" style="animation-delay: 1s;">
+              <span class="inline-block px-4 py-2 bg-gradient-to-r from-purple-800 to-indigo-800 rounded-full text-purple-200 text-sm border border-purple-600">
+                🎯 Topik: <em>Object-Oriented Programming</em> (OOP)
+              </span>
+            </div>
+            
+            <!-- Continue Button -->
+            <button onclick="showScreen('bumper')" 
+                    class="w-full max-w-xs px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl font-bold text-lg transition-all duration-300 animate-pulse-glow animate-fade-in"
+                    style="animation-delay: 1.2s;">
+              Lanjutkan
+            </button>
+          </div>
+        </div>
+      `;
+      }
+
+      function renderBumper() {
+        return `
+        <div class="h-full w-full flex flex-col items-center justify-center p-4" style="background: linear-gradient(135deg, #0f0a1e 0%, #1e1b4b 50%, #312e81 100%);">
+          <div class="text-center animate-float">
+            <div class="text-6xl mb-4">🎮</div>
+            <h1 class="font-pixel text-lg md:text-2xl text-yellow-400 mb-2" style="text-shadow: 0 0 15px rgba(250, 204, 21, 0.5);">
+              CLASS MAZE
+            </h1>
+            <h2 class="font-pixel text-sm md:text-base text-purple-300 mb-4">ADVENTURE</h2>
+            <p class="text-gray-300 text-base mb-1">Jelajahi Labirin & Pelajari</p>
+            <p class="text-lg text-cyan-400 font-bold"><em>Object-Oriented Programming</em></p>
+          </div>
+          
+          <nav class="mt-6 flex flex-col gap-3 w-full max-w-xs">
+            <button onclick="showScreen('characterSelect')" 
+                    class="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl font-bold text-lg transition-all duration-300 animate-pulse-glow flex items-center justify-center gap-2">
+              🚀 MULAI BERMAIN
+            </button>
+            <button onclick="showScreen('leaderboard')" 
+                    class="w-full px-5 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-xl font-bold text-base transition-all duration-300">
+              🏆 Papan Peringkat
+            </button>
+            <button onclick="showScreen('tutorial')" 
+                    class="w-full px-5 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 rounded-xl font-bold text-base transition-all duration-300">
+              📖 Cara Bermain
+            </button>
+          </nav>
+          
+          <footer class="absolute bottom-4 text-center text-gray-500 text-xs">
+            <p>OOP dengan Python - 8 Level</p>
+          </footer>
+        </div>
+      `;
+      }
+
+      function renderCharacterSelect() {
+        return `
+        <div class="h-full w-full flex flex-col items-center p-4 overflow-auto" style="background: linear-gradient(135deg, #0f0a1e 0%, #1e1b4b 50%, #312e81 100%);">
+          <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
+            <button onclick="showScreen('bumper')" class="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold text-sm transition-colors mb-4">
+              ← Kembali
+            </button>
+            
+            <h2 class="font-pixel text-lg text-yellow-400 text-center mb-6">PILIH KARAKTER</h2>
+            
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4 mb-6 w-full justify-items-center">
+              ${characters
+                .map(
+                  (char) => `
+                <div onclick="selectCharacter('${char.id}')" 
+                     class="character-card ${
+                       GameState.selectedCharacter === char.id ? "selected" : ""
+                     } cursor-pointer w-full max-w-[100px]">
+                  <div class="character-avatar">
+                    ${char.avatar}
+                  </div>
+                  <div class="font-bold text-sm text-white">${char.name}</div>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+            
+            <div class="game-card rounded-xl p-4 mb-6 w-full max-w-md">
+              <label for="nameInput" class="block text-gray-300 mb-2 font-semibold text-base text-center">Nama Pemain:</label>
+              <div id="nameDisplay" 
+                   onclick="showVirtualKeyboard()"
+                   class="w-full px-4 py-3 rounded-lg bg-gray-800 border-2 border-indigo-500 text-white text-lg min-h-[48px] flex items-center justify-center cursor-pointer">
+                ${
+                  GameState.playerName ||
+                  '<span class="text-gray-500">Ketuk untuk memasukkan nama...</span>'
+                }
+              </div>
+            </div>
+            
+            <button onclick="startGame()" 
+                    id="startBtn"
+                    class="w-full max-w-md py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    ${
+                      !GameState.playerName.trim() ||
+                      !GameState.selectedCharacter ||
+                      GameState.isLoading
+                        ? "disabled"
+                        : ""
+                    }>
+              ${
+                GameState.isLoading
+                  ? '<span class="animate-spin">⏳</span> Menyimpan...'
+                  : "Mulai Pertualangan"
+              }
+            </button>
+            
+            <!-- Saved Players List -->
+            ${
+              savedPlayers.length > 0
+                ? `
+              <div class="w-full max-w-md mt-8">
+                <h3 class="text-center text-gray-400 text-sm mb-4">📋 Pemain yang Sudah Bermain:</h3>
+                <div class="space-y-2 max-h-48 overflow-y-auto">
+                  ${savedPlayers
+                    .map(
+                      (player, index) => `
+                    <div onclick="selectExistingPlayer(${index})" 
+                         class="player-list-item flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        ${getCharacterAvatarById(player.characterId)}
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-bold text-white truncate">${
+                          player.playerName
+                        }</div>
+                        <div class="text-xs text-gray-400">Skor: ${(
+                          player.totalScore || 0
+                        ).toLocaleString()}</div>
+                      </div>
+                      <div class="text-yellow-400 text-lg">→</div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+          
+          ${renderPlayerConfirmPopup()}
+          
+          <div id="virtualKeyboard" class="hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t-4 border-indigo-600 p-3 z-50">
+            <div class="max-w-lg mx-auto">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-400 text-sm">Papan Ketik Virtual</span>
+                <button onclick="hideVirtualKeyboard()" class="text-red-400 hover:text-red-300 font-bold text-xl px-2">✕</button>
+              </div>
+              <div id="keyboardInput" class="bg-gray-800 rounded-lg p-3 mb-3 text-base text-white min-h-[40px] text-center"></div>
+              <div class="space-y-1">
+                <div class="flex justify-center gap-1 flex-wrap">
+                  ${["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+                    .map(
+                      (k) =>
+                        `<button onclick="typeKey('${k}')" class="keyboard-key">${k}</button>`
+                    )
+                    .join("")}
+                </div>
+                <div class="flex justify-center gap-1 flex-wrap">
+                  ${["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]
+                    .map(
+                      (k) =>
+                        `<button onclick="typeKey('${k}')" class="keyboard-key">${k}</button>`
+                    )
+                    .join("")}
+                </div>
+                <div class="flex justify-center gap-1 flex-wrap">
+                  ${["A", "S", "D", "F", "G", "H", "J", "K", "L"]
+                    .map(
+                      (k) =>
+                        `<button onclick="typeKey('${k}')" class="keyboard-key">${k}</button>`
+                    )
+                    .join("")}
+                </div>
+                <div class="flex justify-center gap-1 flex-wrap">
+                  ${["Z", "X", "C", "V", "B", "N", "M"]
+                    .map(
+                      (k) =>
+                        `<button onclick="typeKey('${k}')" class="keyboard-key">${k}</button>`
+                    )
+                    .join("")}
+                </div>
+                <div class="flex justify-center gap-1 mt-2">
+                  <button onclick="typeKey(' ')" class="keyboard-key px-8">SPASI</button>
+                  <button onclick="backspaceKey()" class="keyboard-key px-4 bg-red-900 border-red-700">⌫</button>
+                  <button onclick="confirmKeyboard()" class="keyboard-key px-5 bg-green-900 border-green-700">OK</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      }
+
+      function renderPlayerConfirmPopup() {
+        if (
+          !GameState.showingPlayerConfirmPopup ||
+          GameState.selectedExistingPlayer === null
+        )
+          return "";
+
+        const player = savedPlayers[GameState.selectedExistingPlayer];
+        if (!player) return "";
+
+        return `
+        <div class="overlay" onclick="closePlayerConfirmPopup()"></div>
+        <div class="pre-game-popup">
+          <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center border-4 border-purple-500">
+              ${getCharacterAvatarById(player.characterId)}
+            </div>
+            <h3 class="font-bold text-yellow-400 text-xl mb-2">${
+              player.playerName
+            }</h3>
+            <p class="text-gray-300 mb-4">Skor: <span class="text-green-400 font-bold">${(
+              player.totalScore || 0
+            ).toLocaleString()}</span></p>
+            
+            <p class="text-gray-400 text-sm mb-6">Lanjutkan permainan sebagai pemain ini?</p>
+            
+            <div class="flex gap-3">
+              <button onclick="closePlayerConfirmPopup()" 
+                      class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold transition-colors">
+                Batal
+              </button>
+              <button onclick="confirmExistingPlayer()" 
+                      class="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold transition-colors">
+                Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      }
+
+      function renderTutorial() {
+        return `
+        <div class="h-full w-full flex flex-col items-center justify-center p-4 overflow-auto" style="background: linear-gradient(135deg, #0f0a1e 0%, #1e1b4b 50%, #312e81 100%);">
+          <main class="max-w-2xl mx-auto w-full">
+            <h2 class="font-pixel text-lg text-yellow-400 text-center mb-6">CARA BERMAIN</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div class="game-card rounded-xl p-4">
+                <h3 class="text-base font-bold text-cyan-400 mb-3">🎮 Kontrol</h3>
+                <div class="space-y-2 text-gray-300 text-sm">
+                  <p>• Gunakan tombol arah untuk bergerak</p>
+                  <p>• Masukkan karakter ke ruang jawaban</p>
+                  <p>• Hindari laba-laba musuh!</p>
+                </div>
+              </div>
+              
+              <div class="game-card rounded-xl p-4">
+                <h3 class="text-base font-bold text-green-400 mb-3">⚔️ Royal Battle</h3>
+                <div class="space-y-2 text-gray-300 text-sm">
+                  <p>• Jika terkena musuh, masuk pertarungan</p>
+                  <p>• Pilih senjata untuk menyerang</p>
+                  <p>• Kalahkan musuh untuk melanjutkan!</p>
+                </div>
+              </div>
+              
+              <div class="game-card rounded-xl p-4">
+                <h3 class="text-base font-bold text-purple-400 mb-3">✅ Menjawab</h3>
+                <div class="space-y-2 text-gray-300 text-sm">
+                  <p>• Masuki ruang jawaban yang benar</p>
+                  <p>• Benar = +100 + bonus waktu</p>
+                  <p>• Salah = -1 nyawa</p>
+                </div>
+              </div>
+              
+              <div class="game-card rounded-xl p-4">
+                <h3 class="text-base font-bold text-yellow-400 mb-3">🏁 <em>Checkpoint</em></h3>
+                <div class="space-y-2 text-gray-300 text-sm">
+                  <p>• Level 2, 4, 6, 8 = <em>checkpoint</em></p>
+                  <p>• Progres tersimpan otomatis</p>
+                  <p>• Kalah = kembali ke <em>checkpoint</em></p>
+                </div>
+              </div>
+            </div>
+            
+            <button onclick="showScreen('bumper')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-base transition-colors">
+              ← Kembali ke Menu
+            </button>
+          </main>
+        </div>
+      `;
+      }
+
+      function renderLeaderboard() {
+        const leaderboard = getLeaderboard();
+
+        return `
+        <div class="h-full w-full flex flex-col items-center justify-center p-4 overflow-auto" style="background: linear-gradient(135deg, #0f0a1e 0%, #1e1b4b 50%, #312e81 100%);">
+          <main class="max-w-md mx-auto w-full">
+            <h2 class="font-pixel text-lg text-yellow-400 text-center mb-6">PAPAN PERINGKAT</h2>
+            
+            <div class="game-card rounded-xl overflow-hidden mb-6">
+              ${
+                leaderboard.length > 0
+                  ? leaderboard
+                      .slice(0, 10)
+                      .map(
+                        (p, i) => `
+                <div class="px-5 py-4 flex items-center gap-4 ${
+                  i > 0 ? "border-t border-indigo-800" : ""
+                }">
+                  <div class="text-2xl">${
+                    i === 0
+                      ? "🥇"
+                      : i === 1
+                      ? "🥈"
+                      : i === 2
+                      ? "🥉"
+                      : `#${i + 1}`
+                  }</div>
+                  <div class="flex-1 font-bold text-base">${p.name}</div>
+                  <div class="text-green-400 font-bold text-base">${p.score.toLocaleString()}</div>
+                </div>
+              `
+                      )
+                      .join("")
+                  : `
+                <div class="px-5 py-8 text-center text-gray-400">
+                  <div class="text-4xl mb-3">🏆</div>
+                  <p>Belum ada pemain yang bermain.</p>
+                  <p class="text-sm mt-2">Jadilah yang pertama!</p>
+                </div>
+              `
+              }
+            </div>
+            
+            <button onclick="showScreen('bumper')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-base transition-colors">
+              ← Kembali ke Menu
+            </button>
+          </main>
+        </div>
+      `;
+      }
+
+      function renderLevelSelect() {
+        const highestCompleted = Object.keys(GameState.completedLevels)
+          .map(Number)
+          .reduce((max, level) => Math.max(max, level), 0);
+        const unlockedUpTo = highestCompleted + 1;
+
+        return `
+        <div class="h-full w-full flex flex-col items-center p-4 overflow-auto" style="background: linear-gradient(135deg, #0f0a1e 0%, #1e1b4b 50%, #312e81 100%);">
+          <header class="flex justify-between items-center mb-6 w-full max-w-4xl">
+            <button onclick="showScreen('bumper')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold text-sm">
+              ← Menu
+            </button>
+            <div class="text-center">
+              <div class="font-bold text-yellow-400 text-base">${
+                GameState.playerName
+              }</div>
+              <div class="text-sm text-gray-400">Skor: ${GameState.score.toLocaleString()}</div>
+            </div>
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+              ${getCharacterAvatar()}
+            </div>
+          </header>
+          
+          <h2 class="font-pixel text-lg text-yellow-400 text-center mb-6">PILIH LEVEL</h2>
+          
+          <main class="flex-1 flex items-start justify-center w-full">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full justify-items-center">
+              ${levels
+                .map((level) => {
+                  const completed = GameState.completedLevels[level.id];
+                  const isCompleted = !!completed;
+                  const isUnlocked = level.id <= unlockedUpTo;
+
+                  let cardClass = "level-card w-full max-w-[180px]";
+                  if (isCompleted) cardClass += " completed";
+                  else if (level.isCheckpoint) cardClass += " checkpoint";
+                  if (!isUnlocked) cardClass += " locked";
+
+                  return `
+                  <div class="${cardClass}">
+                    ${isCompleted ? '<div class="completed-badge">✓</div>' : ""}
+                    ${
+                      !isUnlocked
+                        ? '<div class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl"><span class="text-3xl">🔒</span></div>'
+                        : ""
+                    }
+                    <div class="font-bold text-white text-base mb-1">Level ${
+                      level.id
+                    } ${level.isCheckpoint ? "🏁" : ""}</div>
+                    <div class="text-sm text-cyan-400 mb-2"><em>${
+                      level.name
+                    }</em></div>
+                    <div class="flex items-center justify-center gap-3 text-xs text-gray-400 mb-3">
+                      <span>⏱️ ${formatTime(level.timeLimit)}</span>
+                      <span>🕷️ ×${level.enemyCount}</span>
+                    </div>
+                    ${
+                      isCompleted
+                        ? `<div class="text-sm text-yellow-400 mb-3">🏆 ${completed.score} poin</div>`
+                        : ""
+                    }
+                    ${
+                      isUnlocked
+                        ? `
+                      <button onclick="showPreGamePopup(${level.id})" 
+                              class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-bold text-sm transition-colors">
+                        ${isCompleted ? "Main Lagi" : "Mulai"}
+                      </button>
+                    `
+                        : ""
+                    }
+                  </div>
+                `;
+                })
+                .join("")}
+            </div>
+          </div>
+        </div>
+        ${renderPreGamePopup()}
+      `;
+      }
+
+      function renderPreGamePopup() {
+        if (!GameState.showingPreGamePopup || !GameState.currentQuestion)
+          return "";
+
+        const level = levels.find((l) => l.id === GameState.currentLevel);
+
+        return `
+        <div class="overlay" onclick="closePreGamePopup()"></div>
+        <aside class="pre-game-popup" aria-label="Pre-game popup">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-bold text-yellow-400 text-lg">Level ${level.id}: <em>${level.name}</em></h3>
+            <button onclick="closePreGamePopup()" class="text-gray-400 hover:text-white text-2xl leading-none">✕</button>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-bold text-cyan-400 text-base mb-3">📝 Pertanyaan:</h4>
+            <p class="text-white text-base mb-4">${GameState.currentQuestion.text}</p>
+            <div class="code-block rounded-lg p-4 text-sm max-h-40 overflow-auto text-green-300">${GameState.currentQuestion.code}</div>
+          </div>
+          
+          <div class="bg-indigo-900/50 rounded-lg p-4 mb-6">
+            <p class="text-gray-300 text-sm text-center">
+              💡 Masukkan karaktermu ke ruang jawaban yang benar di labirin!<br>
+              <span class="text-yellow-400">Hati-hati dengan ${level.enemyCount} laba-laba!</span>
+            </p>
+          </div>
+          
+          <button onclick="startLevelGame()" 
+                  class="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold text-base transition-colors">
+            Mulai Level
+          </button>
+        </aside>
+      `;
+      }
+
+      function renderResultPopup() {
+        if (!GameState.showingResultPopup) return "";
+
+        const isCorrect = GameState.resultType === "correct";
+
+        return `
+        <div class="overlay"></div>
+        <div class="result-popup show ${
+          isCorrect ? "correct" : "incorrect"
+        }" role="alert">
+          <div class="text-6xl mb-4">${isCorrect ? "✅" : "❌"}</div>
+          <h2 class="font-pixel text-xl ${
+            isCorrect ? "text-green-400" : "text-red-400"
+          } mb-3">
+            ${isCorrect ? "BENAR!" : "SALAH!"}
+          </h2>
+          <p class="text-gray-300 text-base mb-4">
+            ${isCorrect ? "+100 poin + bonus waktu" : "Nyawa berkurang 1"}
+          </p>
+          ${
+            isCorrect
+              ? `
+            <div class="text-yellow-400 font-bold text-xl">+${
+              100 + Math.floor(GameState.timeLeft / 2)
+            } poin</div>
+          `
+              : ""
+          }
+        </div>
+      `;
+      }
+
+      function renderBattle() {
+        if (!GameState.inBattle) return "";
+
+        const playerXPPercent = Math.max(0, (GameState.playerXP / 500) * 100);
+        const enemyXPPercent = Math.max(0, (GameState.enemyXP / 750) * 100);
+        const weapons = getCharacterWeapons();
+        const currentEnemy = GameState.enemies[GameState.currentEnemyIndex];
+        const enemyDamage = currentEnemy ? currentEnemy.damage : 50;
+
+        return `
+        <div class="battle-overlay">
+          <h2 class="font-pixel text-xl text-red-400 mb-6">���️ ROYAL BATTLE ⚔���</h2>
+          
+          <div class="flex justify-between items-start gap-8 mb-8 w-full max-w-lg">
+            <!-- Player -->
+            <div class="text-center flex-1 relative">
+              <div id="playerBattle" class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gray-700 border-4 border-blue-500 flex items-center justify-center ${
+                GameState.isPlayerAttacking ? "animate-attack-right" : ""
+              } ${GameState.isEnemyAttacking ? "animate-hit" : ""}">
+                ${getCharacterAvatar()}
+              </div>
+              ${
+                GameState.isPlayerAttacking && GameState.attackingWeapon
+                  ? `
+                <div class="flying-weapon animate-weapon-right" style="left: 50%; top: 30px;">
+                  ${GameState.attackingWeapon.split(" ")[0]}
+                </div>
+              `
+                  : ""
+              }
+              <div class="text-sm text-blue-400 font-bold mb-2">${
+                GameState.playerName
+              }</div>
+              <div class="xp-bar w-full">
+                <div class="xp-fill bg-gradient-to-r from-blue-600 to-blue-400" style="width: ${playerXPPercent}%"></div>
+              </div>
+              <div class="text-xs text-blue-300 mt-1">${Math.max(
+                0,
+                GameState.playerXP
+              )}/500 XP</div>
+            </div>
+            
+            <div class="relative flex items-center justify-center">
+              <div class="text-4xl animate-pulse">⚔️</div>
+            </div>
+            
+            <!-- Enemy -->
+            <div class="text-center flex-1 relative">
+              <div id="enemyBattle" class="w-20 h-20 mx-auto mb-3 flex items-center justify-center ${
+                GameState.isEnemyAttacking ? "animate-attack-left" : ""
+              } ${GameState.isPlayerAttacking ? "animate-hit" : ""}">
+                <div class="text-5xl animate-enemy">🕷️</div>
+              </div>
+              ${
+                GameState.isEnemyAttacking
+                  ? `
+                <div class="flying-weapon animate-weapon-left" style="right: 50%; top: 30px;">
+                  🕸️
+                </div>
+              `
+                  : ""
+              }
+              <div class="text-sm text-red-400 font-bold mb-2">Laba-laba</div>
+              <div class="text-xs text-orange-400 mb-1">Serangan: -${enemyDamage} XP</div>
+              <div class="xp-bar w-full">
+                <div class="xp-fill bg-gradient-to-r from-red-600 to-red-400" style="width: ${enemyXPPercent}%"></div>
+              </div>
+              <div class="text-xs text-red-300 mt-1">${Math.max(
+                0,
+                GameState.enemyXP
+              )}/750 XP</div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h3 class="text-center text-gray-400 text-sm mb-3">Pilih Senjata:</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              ${weapons
+                .map((w) => {
+                  const uses = GameState.weaponUses[w.id] || 0;
+                  const remaining = w.maxUses - uses;
+                  const disabled =
+                    remaining <= 0 ||
+                    GameState.isPlayerAttacking ||
+                    GameState.isEnemyAttacking;
+
+                  return `
+                  <button onclick="attack('${w.id}')" 
+                          class="weapon-btn ${
+                            disabled ? "" : "hover:border-indigo-400"
+                          }"
+                          ${disabled ? "disabled" : ""}>
+                    <div class="w-10 h-10 mx-auto mb-1">${getWeaponSVG(
+                      w.id
+                    )}</div>
+                    <div class="text-xs text-gray-400">${w.name
+                      .split(" ")
+                      .slice(1)
+                      .join(" ")}</div>
+                    <div class="text-xs text-yellow-400 mt-1">-${
+                      w.damage
+                    } XP</div>
+                    <div class="text-xs ${
+                      remaining <= 2 ? "text-red-400" : "text-green-400"
+                    } mt-1">
+                      Sisa: ${remaining}/${w.maxUses}
+                    </div>
+                  </button>
+                `;
+                })
+                .join("")}
+            </div>
+          </div>
+          
+          <div class="text-center text-gray-500 text-xs">
+            ❤️ Nyawa: ${Array(3)
+              .fill()
+              .map((_, i) => (i < GameState.lives ? "❤️" : "🖤"))
+              .join("")}
+          </div>
+        </div>
+      `;
+      }
+
+      function renderMaze() {
+        const maze = getCurrentMaze();
+        let mazeHTML = "";
+
+        for (let y = 0; y < GRID_ROWS; y++) {
+          for (let x = 0; x < GRID_COLS; x++) {
+            const cell = maze.grid[y][x];
+            const px = x * CELL_SIZE;
+            const py = y * CELL_SIZE;
+
+            if (cell === 1) {
+              mazeHTML += `<div class="maze-cell" style="left:${px}px;top:${py}px;width:${CELL_SIZE}px;height:${CELL_SIZE}px;"></div>`;
+            }
+          }
+        }
+
+        const roomLabels = ["A", "B", "C", "D", "E"];
+
+        roomLabels.forEach((label) => {
+          const room = maze.rooms[label];
+          if (!room) return;
+
+          const answer = GameState.currentQuestion.answers.find(
+            (a) => a.id === label
+          );
+          if (!answer) return;
+
+          const px = room.gridX * CELL_SIZE;
+          const py = room.gridY * CELL_SIZE;
+          const textWidth = getTextWidth(answer.text);
+          const roomWidth = Math.max(room.width * CELL_SIZE, textWidth);
+          const roomHeight = room.height * CELL_SIZE;
+
+          mazeHTML += `
+          <div class="answer-room" id="room-${label}"
+               style="left:${px}px;top:${py}px;width:${roomWidth}px;height:${roomHeight}px;">
+            <span class="text-white text-center font-bold leading-tight px-2" style="font-size: 11px; word-break: keep-all; white-space: nowrap;">
+              ${answer.text}
+            </span>
+          </div>
+        `;
+        });
+
+        return mazeHTML;
+      }
+
+      function renderGame() {
+        const level = levels.find((l) => l.id === GameState.currentLevel);
+        if (!level) return "";
+
+        const playerPixel = gridToPixel(
+          GameState.playerPos.x,
+          GameState.playerPos.y
+        );
+
+        return `
+        <div class="h-full w-full flex flex-col overflow-hidden" style="background: linear-gradient(135deg, #0a0a15 0%, #1a1a2e 100%);">
+          <header class="game-header">
+            <div class="flex justify-between items-center h-full">
+              <button onclick="exitLevel()" class="px-3 py-1 bg-red-700 hover:bg-red-600 rounded text-xs font-bold">✕</button>
+              
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-cyan-400 font-bold">Lv.${
+                  level.id
+                }</span>
+                <span class="font-bold text-base ${
+                  GameState.timeLeft <= 20 ? "text-red-400" : "text-yellow-400"
+                }" id="timerDisplay">${formatTime(GameState.timeLeft)}</span>
+                <span class="flex gap-0.5" id="livesDisplay">
+                  ${Array(3)
+                    .fill()
+                    .map(
+                      (_, i) =>
+                        `<span class="text-sm">${
+                          i < GameState.lives ? "❤️" : "🖤"
+                        }</span>`
+                    )
+                    .join("")}
+                </span>
+                <span class="text-green-400 font-bold text-sm" id="scoreDisplay">⭐ ${
+                  GameState.score
+                }</span>
+              </div>
+            </div>
+          </header>
+          
+          <main class="flex-1 flex items-center justify-center overflow-hidden relative" style="padding-top: 38px;">
+            <div class="maze-container" id="mazeContainer" style="width: ${MAZE_WIDTH}px; height: ${MAZE_HEIGHT}px;">
+              ${renderMaze()}
+              
+              <!-- Coins -->
+              ${GameState.coins
+                .filter((c) => !c.collected)
+                .map((coin, i) => {
+                  const coinPixel = gridToPixel(coin.x, coin.y);
+                  return `
+                  <div class="pickup-item" id="coin-${i}" style="left: ${
+                    coinPixel.x - 12
+                  }px; top: ${coinPixel.y - 12}px; width: 24px; height: 24px;">
+                    ${coinSVG}
+                  </div>
+                `;
+                })
+                .join("")}
+              
+              <!-- Weapon Pickups -->
+              ${GameState.weaponPickups
+                .filter((w) => !w.collected)
+                .map((pickup, i) => {
+                  const pickupPixel = gridToPixel(pickup.x, pickup.y);
+                  // Use stored weapon ID for consistent icon display - same as Royal Battle
+                  const svg = getWeaponSVG(pickup.weaponId);
+                  return `
+                  <div class="pickup-item" id="weapon-pickup-${i}" style="left: ${
+                    pickupPixel.x - 12
+                  }px; top: ${
+                    pickupPixel.y - 12
+                  }px; width: 24px; height: 24px;" title="+2 Ammo: ${
+                    pickup.weaponId
+                  }">
+                    ${svg}
+                  </div>
+                `;
+                })
+                .join("")}
+              
+              <!-- XP Pickups -->
+              ${GameState.xpPickups
+                .filter((x) => !x.collected)
+                .map((xp, i) => {
+                  const xpPixel = gridToPixel(xp.x, xp.y);
+                  return `
+                  <div class="pickup-item" id="xp-pickup-${i}" style="left: ${
+                    xpPixel.x - 16
+                  }px; top: ${xpPixel.y - 10}px; width: 32px; height: 20px;">
+                    <div style="background: linear-gradient(to bottom, #ffd700, #b8860b); border-radius: 4px; padding: 2px 4px; font-size: 9px; font-weight: bold; color: #5c4813; text-align: center; border: 1px solid #b8860b;">
+                      +${xp.value}XP
+                    </div>
+                  </div>
+                `;
+                })
+                .join("")}
+              
+              <!-- Enemies (Spiders) with XP -->
+              ${GameState.enemies
+                .map((enemy, i) => {
+                  const enemyPixel = gridToPixel(enemy.x, enemy.y);
+                  const xpPercent = Math.max(
+                    0,
+                    ((enemy.xp || 750) / 750) * 100
+                  );
+                  return `
+                  <div class="enemy animate-enemy" id="enemy-${i}" style="left: ${
+                    enemyPixel.x - 12
+                  }px; top: ${enemyPixel.y - 12}px;">
+                    <div class="xp-indicator enemy-xp-bar" style="top: -14px; left: 50%; transform: translateX(-50%); width: 40px;">
+                      <div style="width: ${xpPercent}%; height: 4px; background: #ef4444; border-radius: 2px;"></div>
+                    </div>
+                    ${spiderSVG}
+                  </div>
+                `;
+                })
+                .join("")}
+              
+              <!-- Player with XP -->
+              <div class="player animate-player" id="player" style="left: ${
+                playerPixel.x - 14
+              }px; top: ${playerPixel.y - 14}px;">
+                <div class="xp-indicator player-xp-bar" id="playerXPBar" style="top: -14px; left: 50%; transform: translateX(-50%); width: 40px;">
+                  <div id="playerXPFill" style="width: ${Math.max(
+                    0,
+                    (GameState.playerXP / 500) * 100
+                  )}%; height: 4px; background: #3b82f6; border-radius: 2px; transition: width 0.3s ease;"></div>
+                </div>
+                <div id="playerXPText" style="position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: 7px; color: #3b82f6; white-space: nowrap; font-weight: bold;">${
+                  GameState.playerXP
+                }/500</div>
+                ${getCharacterAvatar()}
+              </div>
+            </div>
+          </main>
+          
+          <nav class="controls-container" aria-label="Game controls">
+            <div class="flex flex-col items-center gap-1">
+              <button onclick="movePlayer(0, -1)" class="control-btn">⬆️</button>
+              <div class="flex gap-1">
+                <button onclick="movePlayer(-1, 0)" class="control-btn">⬅️</button>
+                <button onclick="movePlayer(0, 1)" class="control-btn">⬇️</button>
+                <button onclick="movePlayer(1, 0)" class="control-btn">➡️</button>
+              </div>
+            </div>
+          </nav>
+          
+          <button onclick="toggleQuestionPopup()" class="view-question-btn">📝 Soal</button>
+          
+          ${
+            GameState.showingQuestionPopup
+              ? `
+            <aside class="question-popup">
+              <div class="flex justify-between items-start mb-3">
+                <h3 class="font-bold text-yellow-400 text-sm">📝 Pertanyaan</h3>
+                <button onclick="toggleQuestionPopup()" class="text-gray-400 hover:text-white text-lg">✕</button>
+              </div>
+              <p class="text-sm text-white mb-3">${GameState.currentQuestion.text}</p>
+              <div class="code-block rounded p-3 text-xs max-h-32 overflow-auto text-green-300">${GameState.currentQuestion.code}</div>
+            </aside>
+          `
+              : ""
+          }
+          
+          ${renderResultPopup()}
+          ${renderBattle()}
+        </div>
+      `;
+      }
+
+      function renderVictory() {
+        const level = levels.find((l) => l.id === GameState.currentLevel);
+        const timeBonus = Math.floor(GameState.timeLeft / 2);
+        const coinBonus = GameState.coinScore || 0;
+        const totalBonus = 100 + timeBonus + coinBonus;
+
+        return `
+        <div class="w-full h-full" style="background: linear-gradient(135deg, #0f0a1e 0%, #065f46 50%, #047857 100%); display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+          <div style="width: 100%; max-width: 380px; text-align: center; padding: 20px; margin: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            
+            <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+            
+            <h1 class="font-pixel" style="font-size: 18px; color: #facc15; margin-bottom: 20px; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);">
+              LEVEL ${GameState.currentLevel} SELESAI!
+            </h1>
+            
+            <div style="background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%); border: 2px solid #6366f1; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+              <h2 style="font-weight: bold; color: #22d3ee; margin-bottom: 16px; font-size: 16px;">📊 Detail Skor</h2>
+              
+              <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #d1d5db;">Jawaban Benar</span>
+                  <span style="color: #4ade80; font-weight: bold;">+100</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #d1d5db;">Bonus Waktu</span>
+                  <span style="color: #22d3ee; font-weight: bold;">+${timeBonus}</span>
+                </div>
+                ${
+                  coinBonus > 0
+                    ? `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #d1d5db;">Koin (${
+                    GameState.coinsCollected || 0
+                  }×)</span>
+                  <span style="color: #facc15; font-weight: bold;">+${coinBonus}</span>
+                </div>
+                `
+                    : ""
+                }
+                <div style="border-top: 1px solid #4b5563; padding-top: 12px; margin-top: 4px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-weight: bold;">
+                    <span style="color: white;">Total Level</span>
+                    <span style="color: #facc15; font-size: 18px;">+${totalBonus}</span>
+                  </div>
+                </div>
+                <div style="border-top: 1px solid #4b5563; padding-top: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-weight: bold;">
+                    <span style="color: white; font-size: 16px;">Total Skor</span>
+                    <span style="color: #4ade80; font-size: 22px;">${GameState.score.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            ${
+              level && level.isCheckpoint
+                ? `
+              <div style="background: rgba(120, 53, 15, 0.5); border: 1px solid #ca8a04; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <p style="color: #facc15; font-size: 14px; font-weight: bold;">🏁 <em>CHECKPOINT</em> TERSIMPAN!</p>
+              </div>
+            `
+                : ""
+            }
+            
+            <button onclick="showScreen('levelSelect')" 
+                    style="width: 100%; padding: 16px 20px; background: linear-gradient(to right, #4f46e5, #6366f1); border: none; border-radius: 12px; font-weight: bold; font-size: 16px; color: white; cursor: pointer; transition: all 0.2s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #6366f1, #818cf8)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #4f46e5, #6366f1)'">
+              ← Pilih Level
+            </button>
+          </div>
+        </div>
+      `;
+      }
+
+      function renderGameOver() {
+        const checkpointLevel = GameState.lastCheckpoint;
+
+        return `
+        <div class="h-full w-full flex flex-col items-center justify-center p-4" style="background: linear-gradient(135deg, #0f0a1e 0%, #7f1d1d 50%, #991b1b 100%);">
+          <main class="text-center max-w-sm w-full">
+            <div class="text-6xl mb-4">💀</div>
+            <h1 class="font-pixel text-2xl text-red-400 mb-3">GAME OVER</h1>
+            <p class="text-gray-300 text-base mb-6">Jangan menyerah! Coba lagi!</p>
+            
+            <div class="game-card rounded-xl p-4 mb-6">
+              <div class="text-2xl font-bold text-yellow-400">${GameState.score.toLocaleString()}</div>
+              <div class="text-sm text-gray-400">Total Skor</div>
+            </div>
+            
+            ${
+              checkpointLevel > 0
+                ? `
+              <div class="bg-yellow-900/50 border border-yellow-600 rounded-lg p-3 mb-4">
+                <p class="text-yellow-400 text-sm">Kembali ke <em>Checkpoint</em>: Level ${checkpointLevel}</p>
+              </div>
+              <button onclick="showPreGamePopup(${checkpointLevel})" 
+                      class="w-full px-6 py-4 bg-yellow-600 hover:bg-yellow-500 rounded-xl font-bold text-base transition-colors mb-3">
+                Lanjut dari <em>Checkpoint</em>
+              </button>
+            `
+                : ""
+            }
+            
+            <button onclick="showScreen('levelSelect')" 
+                    class="w-full px-6 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-base transition-colors">
+              Pilih Level
+            </button>
+          </main>
+        </div>
+      `;
+      }
+
+      // Game Logic
+      function showScreen(screen) {
+        stopGame();
+        GameState.currentScreen = screen;
+        GameState.showingQuestionPopup = false;
+        GameState.showingPreGamePopup = false;
+        GameState.showingResultPopup = false;
+        GameState.isPaused = false;
+        GameState.inBattle = false;
+        GameState.showingPlayerConfirmPopup = false;
+
+        if (screen === "characterSelect") {
+          GameState.playerName = "";
+          GameState.selectedCharacter = null;
+          GameState.isNewPlayer = true;
+          GameState.currentPlayerRecord = null;
+          GameState.completedLevels = {};
+          GameState.score = 0;
+          GameState.lastCheckpoint = 0;
+        }
+
+        render();
+      }
+
+      function selectCharacter(id) {
+        GameState.selectedCharacter = id;
+        render();
+      }
+
+      function selectExistingPlayer(index) {
+        GameState.selectedExistingPlayer = index;
+        GameState.showingPlayerConfirmPopup = true;
+        render();
+      }
+
+      function closePlayerConfirmPopup() {
+        GameState.showingPlayerConfirmPopup = false;
+        GameState.selectedExistingPlayer = null;
+        render();
+      }
+
+      function confirmExistingPlayer() {
+        const player = savedPlayers[GameState.selectedExistingPlayer];
+        if (!player) return;
+
+        GameState.playerName = player.playerName;
+        GameState.selectedCharacter = player.characterId;
+        GameState.score = player.totalScore || 0;
+        GameState.lastCheckpoint = player.lastCheckpoint || 0;
+        GameState.currentPlayerRecord = player;
+        GameState.isNewPlayer = false;
+
+        try {
+          GameState.completedLevels = player.completedLevels
+            ? JSON.parse(JSON.stringify(player.completedLevels))
+            : {};
+        } catch (e) {
+          GameState.completedLevels = {};
+        }
+
+        GameState.showingPlayerConfirmPopup = false;
+        GameState.currentScreen = "levelSelect";
+        render();
+      }
+
+      let keyboardBuffer = "";
+
+      function showVirtualKeyboard() {
+        keyboardBuffer = GameState.playerName;
+        const keyboard = document.getElementById("virtualKeyboard");
+        if (keyboard) {
+          keyboard.classList.remove("hidden");
+          updateKeyboardDisplay();
+        }
+      }
+
+      function hideVirtualKeyboard() {
+        const keyboard = document.getElementById("virtualKeyboard");
+        if (keyboard) keyboard.classList.add("hidden");
+      }
+
+      function updateKeyboardDisplay() {
+        const input = document.getElementById("keyboardInput");
+        if (input) input.textContent = keyboardBuffer || "";
+      }
+
+      function typeKey(key) {
+        if (keyboardBuffer.length < 20) {
+          keyboardBuffer += key;
+          updateKeyboardDisplay();
+        }
+      }
+
+      function backspaceKey() {
+        keyboardBuffer = keyboardBuffer.slice(0, -1);
+        updateKeyboardDisplay();
+      }
+
+      function confirmKeyboard() {
+        GameState.playerName = keyboardBuffer;
+        hideVirtualKeyboard();
+        render();
+      }
+
+      function startGame() {
+        if (!GameState.playerName.trim() || !GameState.selectedCharacter)
+          return;
+
+        GameState.isLoading = true;
+        render();
+
+        const existingPlayerIndex = savedPlayers.findIndex(
+          (p) =>
+            p.playerName.toLowerCase() ===
+            GameState.playerName.trim().toLowerCase()
+        );
+
+        if (existingPlayerIndex !== -1) {
+          const existingPlayer = savedPlayers[existingPlayerIndex];
+          GameState.currentPlayerRecord = existingPlayer;
+          GameState.isNewPlayer = false;
+          GameState.score = existingPlayer.totalScore || 0;
+          GameState.lastCheckpoint = existingPlayer.lastCheckpoint || 0;
+          try {
+            GameState.completedLevels = existingPlayer.completedLevels
+              ? JSON.parse(JSON.stringify(existingPlayer.completedLevels))
+              : {};
+          } catch (e) {
+            GameState.completedLevels = {};
+          }
+        } else {
+          const newPlayer = {
+            id: Date.now().toString(),
+            playerName: GameState.playerName.trim(),
+            characterId: GameState.selectedCharacter,
+            totalScore: 0,
+            lastCheckpoint: 0,
+            completedLevels: {},
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          savedPlayers.push(newPlayer);
+          savePlayersToStorage();
+
+          GameState.currentPlayerRecord = newPlayer;
+          GameState.isNewPlayer = true;
+          GameState.completedLevels = {};
+          GameState.score = 0;
+          GameState.lastCheckpoint = 0;
+        }
+
+        GameState.isLoading = false;
+        showScreen("levelSelect");
+      }
+
+      function savePlayerProgress() {
+        if (!GameState.currentPlayerRecord) {
+          const playerIndex = savedPlayers.findIndex(
+            (p) =>
+              p.playerName.toLowerCase() ===
+              GameState.playerName.trim().toLowerCase()
+          );
+          if (playerIndex !== -1) {
+            GameState.currentPlayerRecord = savedPlayers[playerIndex];
+          }
+        }
+
+        if (GameState.currentPlayerRecord) {
+          const playerIndex = savedPlayers.findIndex(
+            (p) => p.id === GameState.currentPlayerRecord.id
+          );
+          if (playerIndex !== -1) {
+            savedPlayers[playerIndex] = {
+              ...GameState.currentPlayerRecord,
+              totalScore: GameState.score,
+              lastCheckpoint: GameState.lastCheckpoint,
+              completedLevels: GameState.completedLevels,
+              updatedAt: new Date().toISOString(),
+            };
+            GameState.currentPlayerRecord = savedPlayers[playerIndex];
+            savePlayersToStorage();
+          }
+        }
+      }
+
+      function showPreGamePopup(levelId) {
+        const level = levels.find((l) => l.id === levelId);
+        if (!level) return;
+
+        GameState.currentLevel = levelId;
+        GameState.currentQuestionIndex = Math.floor(
+          Math.random() * questionBank[levelId].length
+        );
+        GameState.currentQuestion = getRandomQuestion(levelId);
+        GameState.showingPreGamePopup = true;
+
+        GameState.currentMazeLayout = (levelId - 1) % mazeLayouts.length;
+
+        render();
+      }
+
+      function closePreGamePopup() {
+        GameState.showingPreGamePopup = false;
+        render();
+      }
+
+      function startLevelGame() {
+        const level = levels.find((l) => l.id === GameState.currentLevel);
+        if (!level) return;
+
+        const maze = getCurrentMaze();
+
+        GameState.timeLeft = level.timeLimit;
+        GameState.lives = 3;
+        GameState.playerXP = 500;
+        GameState.answered = false;
+        GameState.playerPos = { x: maze.start.x, y: maze.start.y };
+        GameState.showingPreGamePopup = false;
+        GameState.showingQuestionPopup = false;
+        GameState.showingResultPopup = false;
+        GameState.isPaused = false;
+        GameState.playerInRoom = null;
+        GameState.inBattle = false;
+        GameState.isPlayerAttacking = false;
+        GameState.isEnemyAttacking = false;
+        GameState.attackingWeapon = null;
+
+        GameState.weaponUses = {};
+        GameState.coins = [];
+        GameState.weaponPickups = [];
+        GameState.xpPickups = [];
+        GameState.coinsCollected = 0;
+        GameState.coinScore = 0;
+
+        GameState.enemies = [];
+        const pathCells = [];
+        for (let y = 1; y < GRID_ROWS - 1; y++) {
+          for (let x = 1; x < GRID_COLS - 1; x++) {
+            if (maze.grid[y][x] === 1) {
+              pathCells.push({ x, y });
+            }
+          }
+        }
+
+        for (let i = 0; i < level.enemyCount && pathCells.length > 0; i++) {
+          const randIdx = Math.floor(Math.random() * pathCells.length);
+          const pos = pathCells.splice(randIdx, 1)[0];
+          const damage =
+            enemyDamages[Math.floor(Math.random() * enemyDamages.length)];
+          GameState.enemies.push({
+            x: pos.x,
+            y: pos.y,
+            lastDir: null,
+            damage: damage,
+            xp: 750,
+          });
+        }
+
+        // Spawn coins (5-8 per level) with random values
+        const coinValues = [10, 15, 20, 25, 30];
+        const coinCount = 5 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < coinCount && pathCells.length > 0; i++) {
+          const randIdx = Math.floor(Math.random() * pathCells.length);
+          const pos = pathCells.splice(randIdx, 1)[0];
+          const value =
+            coinValues[Math.floor(Math.random() * coinValues.length)];
+          GameState.coins.push({
+            x: pos.x,
+            y: pos.y,
+            collected: false,
+            value: value,
+          });
+        }
+
+        // Spawn weapon pickups (2-4 per level) - each gives +2 ammo to a specific weapon
+        const charWeapons = getCharacterWeapons();
+        const pickupCount = 2 + Math.floor(Math.random() * 3);
+        for (
+          let i = 0;
+          i < pickupCount && pathCells.length > 0 && charWeapons.length > 0;
+          i++
+        ) {
+          const randIdx = Math.floor(Math.random() * pathCells.length);
+          const pos = pathCells.splice(randIdx, 1)[0];
+          // Randomly select a weapon from character's weapons
+          const randomWeapon =
+            charWeapons[Math.floor(Math.random() * charWeapons.length)];
+          GameState.weaponPickups.push({
+            x: pos.x,
+            y: pos.y,
+            weaponId: randomWeapon.id,
+            collected: false,
+          });
+        }
+
+        // Spawn XP pickups (3-5 per level)
+        const xpValues = [10, 15, 20, 25, 30];
+        const xpCount = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < xpCount && pathCells.length > 0; i++) {
+          const randIdx = Math.floor(Math.random() * pathCells.length);
+          const pos = pathCells.splice(randIdx, 1)[0];
+          GameState.xpPickups.push({
+            x: pos.x,
+            y: pos.y,
+            value: xpValues[Math.floor(Math.random() * xpValues.length)],
+            collected: false,
+          });
+        }
+
+        GameState.currentScreen = "game";
+        render();
+
+        // Check if player spawns on a pickup
+        setTimeout(() => {
+          checkPickups(GameState.playerPos.x, GameState.playerPos.y);
+        }, 100);
+
+        GameState.timerInterval = setInterval(() => {
+          if (
+            !GameState.isPaused &&
+            !GameState.showingResultPopup &&
+            !GameState.inBattle
+          ) {
+            GameState.timeLeft--;
+            updateTimerDisplay();
+            if (GameState.timeLeft <= 0) handleWrongAnswer();
+          }
+        }, 1000);
+
+        GameState.enemyInterval = setInterval(() => {
+          if (
+            !GameState.isPaused &&
+            !GameState.showingResultPopup &&
+            !GameState.inBattle
+          ) {
+            moveEnemies();
+            checkCollision();
+          }
+        }, 600);
+      }
+
+      function updateTimerDisplay() {
+        const timerEl = document.getElementById("timerDisplay");
+        if (timerEl) {
+          timerEl.textContent = formatTime(GameState.timeLeft);
+          timerEl.className = `font-bold text-base ${
+            GameState.timeLeft <= 20 ? "text-red-400" : "text-yellow-400"
+          }`;
+        }
+      }
+
+      function updateLivesDisplay() {
+        const livesEl = document.getElementById("livesDisplay");
+        if (livesEl) {
+          livesEl.innerHTML = Array(3)
+            .fill()
+            .map(
+              (_, i) =>
+                `<span class="text-sm">${
+                  i < GameState.lives ? "❤️" : "🖤"
+                }</span>`
+            )
+            .join("");
+        }
+      }
+
+      function updatePlayerXPDisplay() {
+        const xpFill = document.getElementById("playerXPFill");
+        const xpText = document.getElementById("playerXPText");
+        if (xpFill) {
+          xpFill.style.width = `${Math.max(
+            0,
+            (GameState.playerXP / 500) * 100
+          )}%`;
+        }
+        if (xpText) {
+          xpText.textContent = `${GameState.playerXP}/500`;
+        }
+      }
+
+      function checkPickups(px, py) {
+        const mazeContainer = document.getElementById("mazeContainer");
+
+        // Check for coin pickup
+        GameState.coins.forEach((coin, i) => {
+          if (!coin.collected && coin.x === px && coin.y === py) {
+            coin.collected = true;
+            GameState.coinsCollected++;
+            GameState.coinScore += coin.value;
+
+            // Visual feedback - show coin effect
+            const coinEl = document.getElementById(`coin-${i}`);
+            if (coinEl) {
+              const coinPixel = gridToPixel(coin.x, coin.y);
+
+              // Create floating coin effect
+              if (mazeContainer) {
+                const effect = document.createElement("div");
+                effect.className = "coin-effect text-yellow-400 text-sm";
+                effect.style.left = coinPixel.x - 15 + "px";
+                effect.style.top = coinPixel.y - 10 + "px";
+                effect.innerHTML = `+${coin.value}`;
+                mazeContainer.appendChild(effect);
+                setTimeout(() => effect.remove(), 800);
+              }
+
+              // Hide coin immediately
+              coinEl.remove();
+            }
+          }
+        });
+
+        // Check for weapon pickup - adds ammo to the specific weapon
+        GameState.weaponPickups.forEach((pickup, i) => {
+          if (!pickup.collected && pickup.x === px && pickup.y === py) {
+            pickup.collected = true;
+
+            // Add 2 ammo to the specific weapon (reduce uses by 2)
+            const weaponId = pickup.weaponId;
+            if (!GameState.weaponUses[weaponId])
+              GameState.weaponUses[weaponId] = 0;
+            GameState.weaponUses[weaponId] = Math.max(
+              0,
+              GameState.weaponUses[weaponId] - 2
+            );
+
+            // Get weapon name for display
+            const weapons = getCharacterWeapons();
+            const weapon = weapons.find((w) => w.id === weaponId);
+            const weaponName = weapon ? weapon.name : weaponId;
+
+            // Create floating effect
+            const pickupEl = document.getElementById(`weapon-pickup-${i}`);
+            if (pickupEl) {
+              const pickupPixel = gridToPixel(pickup.x, pickup.y);
+              if (mazeContainer) {
+                const effect = document.createElement("div");
+                effect.className = "coin-effect text-purple-400 text-sm";
+                effect.style.left = pickupPixel.x - 30 + "px";
+                effect.style.top = pickupPixel.y - 10 + "px";
+                effect.innerHTML = `+2 ${weaponName}`;
+                mazeContainer.appendChild(effect);
+                setTimeout(() => effect.remove(), 800);
+              }
+              pickupEl.remove();
+            }
+          }
+        });
+
+        // Check for XP pickup
+        GameState.xpPickups.forEach((xp, i) => {
+          if (!xp.collected && xp.x === px && xp.y === py) {
+            xp.collected = true;
+            GameState.playerXP = Math.min(500, GameState.playerXP + xp.value);
+
+            // Visual feedback - show XP effect
+            const xpEl = document.getElementById(`xp-pickup-${i}`);
+            if (xpEl) {
+              const xpPixel = gridToPixel(xp.x, xp.y);
+
+              if (mazeContainer) {
+                const effect = document.createElement("div");
+                effect.className = "coin-effect text-green-400 text-sm";
+                effect.style.left = xpPixel.x - 20 + "px";
+                effect.style.top = xpPixel.y - 10 + "px";
+                effect.innerHTML = `+${xp.value} XP`;
+                mazeContainer.appendChild(effect);
+                setTimeout(() => effect.remove(), 800);
+              }
+
+              xpEl.remove();
+            }
+
+            updatePlayerXPDisplay();
+          }
+        });
+      }
+
+      function stopGame() {
+        if (GameState.timerInterval) {
+          clearInterval(GameState.timerInterval);
+          GameState.timerInterval = null;
+        }
+        if (GameState.enemyInterval) {
+          clearInterval(GameState.enemyInterval);
+          GameState.enemyInterval = null;
+        }
+      }
+
+      function movePlayer(dx, dy) {
+        if (
+          GameState.answered ||
+          GameState.isPaused ||
+          GameState.showingResultPopup ||
+          GameState.inBattle
+        )
+          return;
+
+        const newX = GameState.playerPos.x + dx;
+        const newY = GameState.playerPos.y + dy;
+
+        if (isWalkable(newX, newY)) {
+          GameState.playerPos.x = newX;
+          GameState.playerPos.y = newY;
+
+          const playerPixel = gridToPixel(newX, newY);
+          const player = document.getElementById("player");
+          if (player) {
+            player.style.left = playerPixel.x - 14 + "px";
+            player.style.top = playerPixel.y - 14 + "px";
+          }
+
+          // Check for pickups at current position
+          checkPickups(newX, newY);
+
+          const roomId = getAnswerRoomAt(newX, newY);
+          if (roomId && GameState.playerInRoom !== roomId) {
+            GameState.playerInRoom = roomId;
+            checkAnswer(roomId);
+          } else if (!roomId) {
+            GameState.playerInRoom = null;
+          }
+
+          checkCollision();
+        }
+      }
+
+      function checkAnswer(answerId) {
+        if (GameState.answered) return;
+
+        const answer = GameState.currentQuestion.answers.find(
+          (a) => a.id === answerId
+        );
+        if (!answer) return;
+
+        GameState.answered = true;
+        GameState.isPaused = true;
+
+        if (answer.correct) {
+          handleCorrectAnswer();
+        } else {
+          handleWrongAnswer();
+        }
+      }
+
+      function handleCorrectAnswer() {
+        const timeBonus = Math.floor(GameState.timeLeft / 2);
+        const coinBonus = GameState.coinScore || 0;
+        const levelScore = 100 + timeBonus + coinBonus;
+
+        const level = levels.find((l) => l.id === GameState.currentLevel);
+        if (level.isCheckpoint) {
+          GameState.lastCheckpoint = GameState.currentLevel;
+        }
+
+        // Check if this level was already completed
+        const existingRecord =
+          GameState.completedLevels[GameState.currentLevel];
+        const previousScore = existingRecord ? existingRecord.score : 0;
+
+        if (levelScore > previousScore) {
+          // New score is higher - update with the difference
+          const scoreDifference = levelScore - previousScore;
+          GameState.score += scoreDifference;
+          GameState.completedLevels[GameState.currentLevel] = {
+            score: levelScore,
+            completed: true,
+          };
+        }
+        // If new score is lower or equal, don't add anything to total score
+
+        savePlayerProgress();
+
+        GameState.showingResultPopup = true;
+        GameState.resultType = "correct";
+        render();
+
+        setTimeout(() => {
+          stopGame();
+          GameState.currentScreen = "victory";
+          GameState.showingResultPopup = false;
+          render();
+        }, 2000);
+      }
+
+      function handleWrongAnswer() {
+        GameState.lives--;
+        GameState.showingResultPopup = true;
+        GameState.resultType = "incorrect";
+        render();
+
+        setTimeout(() => {
+          GameState.showingResultPopup = false;
+
+          if (GameState.lives <= 0) {
+            stopGame();
+            savePlayerProgress();
+            GameState.currentScreen = "gameOver";
+            render();
+          } else {
+            const maze = getCurrentMaze();
+            GameState.answered = false;
+            GameState.isPaused = false;
+            GameState.playerPos = { x: maze.start.x, y: maze.start.y };
+            GameState.playerInRoom = null;
+            render();
+          }
+        }, 1500);
+      }
+
+      function moveEnemies() {
+        const maze = getCurrentMaze();
+
+        GameState.enemies.forEach((enemy, index) => {
+          const validMoves = [];
+          const directions = [
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 },
+          ];
+
+          for (const dir of directions) {
+            const newX = enemy.x + dir.dx;
+            const newY = enemy.y + dir.dy;
+            if (
+              newX >= 0 &&
+              newX < GRID_COLS &&
+              newY >= 0 &&
+              newY < GRID_ROWS &&
+              maze.grid[newY][newX] === 1
+            ) {
+              validMoves.push({ x: newX, y: newY, dx: dir.dx, dy: dir.dy });
+            }
+          }
+
+          if (enemy.lastDir && validMoves.length > 1) {
+            const filtered = validMoves.filter(
+              (m) => !(m.dx === -enemy.lastDir.dx && m.dy === -enemy.lastDir.dy)
+            );
+            if (filtered.length > 0) {
+              validMoves.length = 0;
+              validMoves.push(...filtered);
+            }
+          }
+
+          if (validMoves.length > 0) {
+            const move =
+              validMoves[Math.floor(Math.random() * validMoves.length)];
+            enemy.lastDir = { dx: move.dx, dy: move.dy };
+            enemy.x = move.x;
+            enemy.y = move.y;
+
+            const enemyPixel = gridToPixel(move.x, move.y);
+            const enemyEl = document.getElementById(`enemy-${index}`);
+            if (enemyEl) {
+              enemyEl.style.left = enemyPixel.x - 12 + "px";
+              enemyEl.style.top = enemyPixel.y - 12 + "px";
+            }
+          }
+        });
+      }
+
+      function checkCollision() {
+        if (GameState.playerInRoom || GameState.inBattle) return;
+
+        for (let i = 0; i < GameState.enemies.length; i++) {
+          const enemy = GameState.enemies[i];
+          if (
+            enemy.x === GameState.playerPos.x &&
+            enemy.y === GameState.playerPos.y
+          ) {
+            startBattle(i);
+            return;
+          }
+        }
+      }
+
+      function startBattle(enemyIndex) {
+        GameState.inBattle = true;
+        GameState.currentEnemyIndex = enemyIndex;
+
+        // Use enemy's current XP (persistent from previous battles)
+        const enemy = GameState.enemies[enemyIndex];
+        GameState.enemyXP = enemy.xp || 750;
+
+        // Player XP is already persistent, don't reset it
+        // GameState.playerXP remains as is from previous state
+
+        GameState.isPlayerAttacking = false;
+        GameState.isEnemyAttacking = false;
+        GameState.attackingWeapon = null;
+        render();
+      }
+
+      function attack(weaponId) {
+        if (GameState.isPlayerAttacking || GameState.isEnemyAttacking) return;
+
+        const weapons = getCharacterWeapons();
+        const weapon = weapons.find((w) => w.id === weaponId);
+        if (!weapon) return;
+
+        const uses = GameState.weaponUses[weaponId] || 0;
+        if (uses >= weapon.maxUses) return;
+
+        GameState.weaponUses[weaponId] = uses + 1;
+        GameState.isPlayerAttacking = true;
+        GameState.attackingWeapon = weapon.name;
+
+        render();
+
+        setTimeout(() => {
+          GameState.enemyXP -= weapon.damage;
+
+          // Update enemy's persistent XP
+          if (GameState.enemies[GameState.currentEnemyIndex]) {
+            GameState.enemies[GameState.currentEnemyIndex].xp =
+              GameState.enemyXP;
+          }
+
+          GameState.isPlayerAttacking = false;
+          GameState.attackingWeapon = null;
+
+          render();
+
+          if (GameState.enemyXP <= 0) {
+            setTimeout(() => {
+              GameState.enemies.splice(GameState.currentEnemyIndex, 1);
+              GameState.inBattle = false;
+              GameState.currentEnemyIndex = -1;
+              render();
+            }, 500);
+          } else {
+            setTimeout(() => {
+              const currentEnemy =
+                GameState.enemies[GameState.currentEnemyIndex];
+              if (currentEnemy) {
+                GameState.isEnemyAttacking = true;
+                render();
+
+                setTimeout(() => {
+                  GameState.playerXP -= currentEnemy.damage;
+                  GameState.isEnemyAttacking = false;
+                  render();
+
+                  if (GameState.playerXP <= 0) {
+                    setTimeout(() => {
+                      GameState.lives--;
+                      GameState.inBattle = false;
+                      GameState.currentEnemyIndex = -1;
+                      GameState.playerXP = 500;
+
+                      if (GameState.lives <= 0) {
+                        stopGame();
+                        savePlayerProgress();
+                        GameState.currentScreen = "gameOver";
+                      } else {
+                        const maze = getCurrentMaze();
+                        GameState.playerPos = {
+                          x: maze.start.x,
+                          y: maze.start.y,
+                        };
+                      }
+                      render();
+                    }, 500);
+                  }
+                }, 500);
+              }
+            }, 300);
+          }
+        }, 500);
+      }
+
+      function toggleQuestionPopup() {
+        GameState.showingQuestionPopup = !GameState.showingQuestionPopup;
+        GameState.isPaused = GameState.showingQuestionPopup;
+        render();
+      }
+
+      function exitLevel() {
+        stopGame();
+        showScreen("levelSelect");
+      }
+
+      // Keyboard controls
+      document.addEventListener("keydown", (e) => {
+        if (
+          GameState.currentScreen !== "game" ||
+          GameState.isPaused ||
+          GameState.showingResultPopup ||
+          GameState.inBattle
+        )
+          return;
+
+        switch (e.key) {
+          case "ArrowUp":
+          case "w":
+          case "W":
+            e.preventDefault();
+            movePlayer(0, -1);
+            break;
+          case "ArrowDown":
+          case "s":
+          case "S":
+            e.preventDefault();
+            movePlayer(0, 1);
+            break;
+          case "ArrowLeft":
+          case "a":
+          case "A":
+            e.preventDefault();
+            movePlayer(-1, 0);
+            break;
+          case "ArrowRight":
+          case "d":
+          case "D":
+            e.preventDefault();
+            movePlayer(1, 0);
+            break;
+        }
+      });
+
+      function render() {
+        const app = document.getElementById("app");
+
+        let content = "";
+
+        switch (GameState.currentScreen) {
+          case "apperception":
+            content = renderApperception();
+            break;
+          case "bumper":
+            content = renderBumper();
+            break;
+          case "characterSelect":
+            content = renderCharacterSelect();
+            break;
+          case "tutorial":
+            content = renderTutorial();
+            break;
+          case "leaderboard":
+            content = renderLeaderboard();
+            break;
+          case "levelSelect":
+            content = renderLevelSelect();
+            break;
+          case "game":
+            content = renderGame();
+            break;
+          case "victory":
+            content = renderVictory();
+            break;
+          case "gameOver":
+            content = renderGameOver();
+            break;
+          default:
+            content = renderApperception();
+        }
+
+        app.innerHTML = content;
+      }
+
+      // Initialize
+      function init() {
+        // Kosongkan data pemain untuk fresh start
+        localStorage.removeItem("classMazePlayers");
+        savedPlayers = [];
+        render();
+      }
+
+      init();
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9b7fb170d78c3bdd',t:'MTc2NzQxMzkxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
